@@ -1,0 +1,15 @@
+<?php
+/** @var Dialcom\Przelewy\Block\Form\Przelewy $block */
+
+$code = $block->escapeHtml($block->getMethodCode());
+$extraCharge = $block->getExtraChargeAmount();
+?>
+<fieldset class="admin__fieldset payment-method"
+          id="payment_form_<?php echo $code; ?>"
+          style="display:none;"
+>
+    <?php if (null !== $extraCharge) : ?>
+        <?php echo __('This payment will be increased by'); ?>
+        <?php echo $extraCharge; ?>
+    <?php endif; ?>
+</fieldset>

@@ -1,0 +1,65 @@
+<?php
+$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$passed_order_id = $this->getData('ga_order_id');
+$ga_order_id = isset($passed_order_id) ? $passed_order_id : (int)$helper->getRequestParam('ga_order_id');
+$ga_key = $helper->getConfig(\Dialcom\Przelewy\Helper\Data::XML_PATH_GA_KEY);
+
+if ($ga_order_id > 0 && !empty($ga_key)) {
+    $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($ga_order_id);
+    $currency = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore()->getCurrentCurrencyCode();
+    $ga_brutto_price = $helper->getConfig(\Dialcom\Przelewy\Helper\Data::XML_PATH_GA_GROSS_PRICE) == 1;
+    $amount = $ga_brutto_price ? $order->getGrandTotal() : $order->getSubtotal();
+    $address = $order->getBillingAddress();
+
+    $ga_conversion = array(
+        array('_setAccount', $ga_key),
+        array('_trackPageview'),
+        array('_set', 'currencyCode', $currency),
+        array('_addTrans',
+            $ga_order_id,
+            $helper->getStoreName(),
+            $amount,
+            $order->getTaxAmount(),
+            $order->getShippingAmount(),
+            $address->getCity(),
+            $address->getRegion(),
+            $address->getCountry(),
+        ),
+    );
+
+    $products = $order->getAllItems();
+
+
+    if (is_array($products)) {
+        foreach ($products as $item) {
+            $ga_conversion[] = array(
+                '_addItem',
+                $ga_order_id,
+                $item->getItemId(),
+                $item->getName(),
+                $item->getSku(),
+                $item->getPrice(),
+                $item->getData('qty_ordered'),
+            );
+        }
+    }
+    $ga_conversion[] = array('_trackTrans');
+
+
+    ?>
+    <script type="text/javascript">
+        var _gaq = _gaq || [];
+        <?php foreach($ga_conversion as $ga_item) { ?>
+        _gaq.push(['<?php echo implode("','", $ga_item); ?>']);
+        <?php } ?>
+        (function () {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
+        })();
+    </script>
+<?php } ?>

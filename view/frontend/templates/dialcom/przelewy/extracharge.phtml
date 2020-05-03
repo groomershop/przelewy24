@@ -1,0 +1,12 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$totalCart = $objectManager->get('Magento\Checkout\Model\Session')->getQuote()->getGrandTotal();
+$przelewy =  $objectManager->create('Dialcom\Przelewy\Model\Payment\Przelewy');
+$extracharge_amount = (int) $przelewy->getExtrachargeAmountByAmount($totalCart * 100);
+?>
+
+<?php if ($extracharge_amount > 0) { ?>
+    <p style="font-size:small;font-style: italic;"><?php echo $this->__('This payment will be increased by'); ?>
+        <b><?php echo number_format($extracharge_amount / 100, 2, ',', ' ') . ' ' . filter_var($objectManager->get('Magento\Directory\Model\Currency')->getCurrencySymbol(), FILTER_SANITIZE_STRING); ?></b>.
+    </p>
+<?php } ?>

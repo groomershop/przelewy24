@@ -1,0 +1,57 @@
+<?php $ccards = \Dialcom\Przelewy\Model\Recurring::getCards(); ?>
+<?php $p24_forget = \Dialcom\Przelewy\Model\Recurring::getP24Forget(); ?>
+
+<form method="post" id="form-validate" action="<?php echo $this->getUrl('przelewy/przelewy/mycards'); ?>">
+    <div class="fieldset">
+        <ul class="form-list">
+            <li class="control">
+                <input type="hidden" name="cardforget" value="1">
+                <input type="checkbox" name="p24_forget" id="p24_forget" value="1"
+                       title="<?php echo __('Do not remember my cards') ?>"
+                       class="checkbox" <?php echo $p24_forget == 1 ? 'checked="checked"' : '' ?>
+                >
+                <label for="p24_forget"><?php echo __('Do not remember my cards') ?></label>
+                <button type="submit" title="<?php echo __('Save'); ?>" class="button">
+                    <span><?php echo __('Save'); ?></span></button>
+            </li>
+        </ul>
+    </div>
+</form>
+
+<div style="clear:both"></div>
+
+<?php if (sizeof($ccards) == 0) { ?>
+    <div class="message info empty"><span><?php echo __('Payment cards not found.') ?></span></div>
+<?php } else { ?>
+
+    <div class="dashboard">
+        <div class="box-account box-info">
+            <div class="box-head">
+                <h2><?php echo __('Your payment cards are listed below.') ?></h2>
+            </div>
+
+
+            <?php foreach ($ccards as $ccard) : ?>
+
+                <div class="ccbox">
+                    <h1 class="page-heading"><?php echo $ccard['card_type']; ?></h1>
+                    <p><?php echo $ccard['mask']; ?></p>
+                    <p><?php echo substr($ccard['expires'], 0, 2); ?>/<?php echo substr($ccard['expires'], 2); ?></p>
+                    <a class="p24-button" href="?cardrm=<?php echo (int) $ccard['id']; ?>"
+                       onclick="return confirm('<?php echo __('Are You sure?') ?>');"
+                       title="<?php echo __('Delete') ?>">
+                        <?php echo __('Delete') ?>
+                    </a>
+                </div>
+
+            <?php endforeach; ?>
+
+        </div>
+    </div>
+
+    <div class="buttons-set">
+        <p class="back-link"><a href="<?php echo $this->getUrl('customer/account/') ?>">
+                <small>&laquo; </small><?php echo __('Back') ?></a></p>
+    </div>
+
+<?php }  // if has ccards ?>

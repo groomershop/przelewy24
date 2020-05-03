@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="admin_system_config_changed_section_przelewy_settings">
+        <observer name="p24CacheClear" instance="Dialcom\Przelewy\Observer\CacheClearObserver"/>
+    </event>
+    <event name="sales_order_place_before">
+        <observer name="p24_add_extra_charge" instance="Dialcom\Przelewy\Observer\BeforeSaveOrderObserver"/>
+    </event>
+</config>

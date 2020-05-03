@@ -1,0 +1,18 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
+$order_id = (int)$this->getRequest()->getParam('order_id');
+$order = $objectManager->create('Magento\Sales\Model\Order')->load($order_id);
+if ($order && $order->getBaseTotalDue() > 0) { // jeśli jest coś jeszcze do zapłacenia to pokaż przyciski
+    $incrementid = $order->getIncrementId();
+    $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
+    $form = $helper->getFormFactory();
+    $form->setAction($przelewy->getPaymentURI($order->getOrderCurrencyCode()))->setId('przelewy_przelewy_checkout')->setName('przelewy_przelewy_checkout')->setMethod('POST')->setUseContainer(true);
+    foreach ($przelewy->getRedirectionFormData($incrementid) as $field => $value) {
+        if (!in_array($field, array('p24_method'))) {
+            $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
+        }
+    }
+    $form->addField('submit', 'submit', array('name' => 'submit', 'class' => 'p24-button', 'value' => __('Pay with Przelewy24')));
+    echo '<div class="p24-payment-form" style="text-align: right">', $form->toHtml(), '</div>';
+}

@@ -1,0 +1,278 @@
+#P24FormAreaHolder {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+}
+
+#P24FormAreaHolder > #P24FormArea.popup {
+    float: none;
+    box-shadow: 0 0 40px #000;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+
+#P24FormArea {
+    background: lightgray;
+    background: linear-gradient(to bottom, #ddd 0%, #bbb 100%);
+    border-radius: 10px;
+    padding: 1em;
+    margin-bottom: 0.5em;
+    width: 350px;
+    height: 200px;
+}
+
+#P24_cardHolder, #P24_cardNumber {
+    padding-left: 0.3em;
+}
+
+#P24FormContainer {
+    min-height: 170px;
+}
+
+#P24FormContainer button:hover {
+    background: #3aa04c;
+    background: linear-gradient(to bottom, #3aa04c 0%, #3aa04a 100%);
+}
+
+#P24FormContainer button {
+    border-radius: 4px;
+    font-size: 20px;
+    line-height: 24px;
+    color: #fff;
+    padding: 0;
+    font-weight: bold;
+    background: #43b754;
+    background: linear-gradient(to bottom, #43b754 0%, #41b757 2%, #41b854 4%, #43b756 6%, #41b354 38%, #44b355 40%, #45af55 66%, #41ae53 74%, #42ac52 91%, #41ae55 94%, #43ab54 96%, #42ac52 100%);
+    border: 1px solid;
+    border-color: #399a49 #247f32 #1a6d27 #399a49;
+    padding: 11px 15px 10px 15px;
+    margin: 10px 0 0 100px;
+}
+
+#P24FormContainer button:hover {
+    background: #e94a59;
+    background: linear-gradient(to bottom, #f87582 0%, #e94a59 100%);
+}
+
+#P24FormContainer button {
+    border-radius: 4px;
+    font-size: 20px;
+    line-height: 24px;
+    color: #fff;
+    padding: 0;
+    font-weight: bold;
+    background: #db2032;
+    background: linear-gradient(to bottom, #e94a59 0%, #db2032 100%);
+    border: 1px solid;
+    border-color: #af0d1d #e94a59 #89000d #af0d1d;
+    padding: 11px 15px 10px 15px;
+    margin: 10px auto 0 auto;
+    display: block;
+}
+
+#P24FormContainer p {
+    margin: 1em;
+    text-align: left;
+}
+
+#P24FormContainer input {
+    border: none;
+    border-radius: 4px;
+    height: 23px;
+}
+
+#P24FormArea span.info {
+    margin: 3em 0;
+    display: block;
+    text-align: center;
+}
+
+#uniform-p24_regulation_accept {
+    display: inline-block;
+}
+
+#przelewy24lastmethod_img.inactive, a.bank-box.inactive {
+    opacity: 0.5;
+    -webkit-filter: grayscale(1);
+    -moz-filter: grayscale(1);
+    -ms-filter: grayscale(1);
+    -o-filter: grayscale(1);
+    filter: grayscale(1);
+    filter: gray;
+}
+
+label {
+    cursor: pointer;
+    cursor: hand;
+}
+
+a.bank-box.selected:before {
+    font-family: FontAwesome;
+    content: "\f00c";
+    font-size: 4em;
+    color: #db2032;
+    margin: -34px 0 0 30px;
+    position: absolute;
+    z-index: 2;
+}
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url("../images/fontawesome-webfont.eot?v=4.1.0");
+    src: url("../images/fontawesome-webfont.eot?#iefix&v=4.1.0") format("embedded-opentype"),
+    url("../images/fontawesome-webfont.woff?v=4.1.0") format("woff"),
+    url("../images/fontawesome-webfont.ttf?v=4.1.0") format("truetype"),
+    url("../images/fontawesome-webfont.svg?v=4.1.0#fontawesomeregular") format("svg");
+    font-weight: normal;
+    font-style: normal
+}
+
+.payMethodList li {
+    display: inline-block;
+    width: 20em;
+}
+
+.bank-box.recurring .bank-logo {
+    background: transparent url(../images/cc_empty.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo > span {
+    top: 27px;
+    position: relative;
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.bank-box.recurring .bank-logo-visa, .bank-box.recurring .bank-logo-93d207a5540aa38f404ae593385a7b64 { /* VISA */
+    background: transparent url(../images/cc_visa.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-ecmc, .bank-box.recurring .bank-logo-b05c23fab98df11c755ba516f5df83c0 { /* ECMC */
+    background: transparent url(../images/cc_mastercard.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-maestro, .bank-box.recurring .bank-logo-b4d6cac88f89a1862d9068f831eef183 { /* Maestro-Intl.*/
+    background: transparent url(../images/cc_maestro.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-dc, .bank-box.recurring .bank-logo-8cf5364c4259be0f1a5010e052991c0e { /* Diners Club  */
+    background: transparent url(../images/cc_dinersclub.png) center 2px no-repeat;
+}
+
+.moreStuff {
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2em;
+    cursor: pointer;
+    cursor: hand;
+}
+
+.moreStuff:before {
+    font-family: FontAwesome;
+    content: "\f078    More payment methods    \f078";
+    text-align: center;
+    color: #fff;
+    border: 2px solid #ccc;
+    padding: 0.1em;
+    border-radius: 3px;
+    position: relative;
+    top: 8px;
+    cursor: pointer;
+    cursor: hand;
+    background: #ccc;
+}
+
+.moreStuff:hover {
+    border-color: #bbb;
+}
+
+.moreStuff:hover:before {
+    border-color: #bbb;
+    background: #bbb;
+}
+
+.bank-box.recurring .bank-logo {
+    background: transparent url(../images/cc_empty.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo > span {
+    color: gray;
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.bank-box.recurring .bank-logo-visa, .bank-box.recurring .bank-logo-93d207a5540aa38f404ae593385a7b64 { /* VISA */
+    background: transparent url(../images/cc_visa.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-ecmc, .bank-box.recurring .bank-logo-b05c23fab98df11c755ba516f5df83c0 { /* ECMC */
+    background: transparent url(../images/cc_mastercard.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-maestro, .bank-box.recurring .bank-logo-b4d6cac88f89a1862d9068f831eef183 { /* Maestro-Intl.*/
+    background: transparent url(../images/cc_maestro.png) center 2px no-repeat;
+}
+
+.bank-box.recurring .bank-logo-dc, .bank-box.recurring .bank-logo-8cf5364c4259be0f1a5010e052991c0e { /* Diners Club  */
+    background: transparent url(../images/cc_dinersclub.png) center 2px no-repeat;
+}
+
+.ccbox {
+    background: #fbfbfb;
+    border: 1px solid #d6d4d4;
+    padding: 1em;
+    margin: 1em;
+    width: 40%;
+    display: inline-block;
+}
+
+.ccbox:nth-child(odd) {
+    margin-left: 1%;
+}
+
+.p24-button {
+    background-image: none;
+    background: #eeeeee;
+    border: 1px solid #cccccc;
+    color: #333333;
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    margin: 0;
+    padding: 7px 15px;
+    font-size: 1.4rem;
+    line-height: 1.6rem;
+    box-sizing: border-box;
+    vertical-align: middle;
+    text-decoration: none;
+}
+
+.p24-button:focus,
+.p24-button:active {
+    background: #e2e2e2;
+    border: 1px solid #cccccc;
+    color: #333333;
+    text-decoration: none;
+}
+
+.p24-button:hover {
+    background: #e1e1e1;
+    border: 1px solid #cccccc;
+    color: #333333;
+    text-decoration: none;
+}
+
+.control {
+    list-style: none;
+}
+

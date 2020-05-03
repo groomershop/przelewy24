@@ -1,0 +1,253 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="dialcom_przelewy" translate="label" sortOrder="2424" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Przelewy24</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="text" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Additional description</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="merchant_id" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Merchant ID:</label>
+                    <comment>ID in Przelewy24 - main account login</comment>
+                    <backend_model>Dialcom\Przelewy\Model\Validator</backend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="shop_id" translate="label comment" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Shop ID:</label>
+                    <comment>ID in Przelewy24 - main account login</comment>
+                    <backend_model>Dialcom\Przelewy\Model\Validator</backend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="salt" translate="label comment" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>CRC key:</label>
+                    <comment>You can get CRC key from Przelewy24 dashboard, from my data tab</comment>
+                    <backend_model>Dialcom\Przelewy\Model\Validator</backend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Minimum order amount</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="max_order_total" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum order amount</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Order on gateway list</label>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+                <field id="mode" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Test mode (SANDBOX)</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <backend_model>Dialcom\Przelewy\Model\Validator</backend_model>
+                    <depends>
+                        <field id="*/*/active">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+        <section id="przelewy_settings" translate="label" type="text" sortOrder="2425" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Przelewy24 - advanced settings</label>
+            <tab>sales</tab>
+            <resource>Dialcom_Przelewy::przelewy_settings</resource>
+            <group id="keys" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Keys</label>
+                <field id="api_key" translate="label comment" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API key</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                    <comment>You can get API key from Przelewy24 dashboard, from my data tab</comment>
+                </field>
+                <field id="ga_key" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Analytics key</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+            </group>
+            <!-- to make visible set showIn.. on 1-->
+            <group id="oneclick" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Oneclick payments</label>
+                <field id="oneclick" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Oneclick payments</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+                <field id="payinshop" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payments inside shop</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Allows to pay by credit/debit card without leaving the store website</comment>
+                </field>
+            </group>
+            <group id="paymethods" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Payment methods</label>
+                <field id="showpaymethods" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show available payment methods in shop</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Customer can chose payment method on confirmation page</comment>
+                </field>
+                <field id="paymethod_first" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>paymethod_first</label>
+                </field>
+                <field id="paymethod_second" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>paymethod_second</label>
+                </field>
+                <field id="paymethods_all" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>paymethods_all</label>
+                    <source_model>Dialcom\Przelewy\Model\Config\Channels</source_model>
+                </field>
+            </group>
+            <!-- to make visible set showIn.. on 1-->
+            <group id="promoted" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Additional settings</label>
+                <field id="show_promoted" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Promote some payment methods</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Selected items will be shown next to other payments gateways</comment>
+                </field>
+                <field id="paymethod_promoted" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>paymethod_promoted</label>
+                </field>
+            </group>
+            <group id="paysettings" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Payment Settings</label>
+                <field id="usegraphical" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use graphics list of payment methods</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="p24regulations" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Acceptation of Przelewy24 conditions</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Shows button for acceptation of Przelewy24 conditions in shop website</comment>
+                </field>
+                <!-- to make visible set showIn.. on 1-->
+                <field id="installment" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Installment Settings</label>
+                    <source_model>Dialcom\Przelewy\Model\Config\Installment</source_model>
+                </field>
+                <field id="payslow" translate="label comment" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Allow also for not immediate payments</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>This setting increases the number of available payment methods</comment>
+                </field>
+                <field id="timelimit" translate="label comment" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Adjust the time limit for completion of the transaction</label>
+                    <validate>validate-number</validate>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                    <comment>Value 0 means no time limit</comment>
+                </field>
+                <!-- to make visible set showIn.. on 1-->
+                <field id="sendlink_mailtemplate" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mail theme for button 'Send P24 link by email'</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                </field>
+                <!-- to make visible set showIn.. on 1-->
+                <field id="ivr" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Pay by IVR</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="chg_state" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Change order status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="mk_invoice" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create invoice</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="wait_for_result" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Wait for transaction result</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>After leaving the bank website, wait for the P24 transaction result?</comment>
+                </field>
+            </group>
+            <group id="additionall" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Additional settings</label>
+                <field id="extracharge" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable extra charge</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="extracharge_product" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Choose product</label>
+                    <comment>This virtual product will be added to the invoice with amount:</comment>
+                    <source_model>Dialcom\Przelewy\Model\Config\Product</source_model>
+                    <depends>
+                        <field id="*/*/extracharge">1</field>
+                    </depends>
+                </field>
+                <field id="extracharge_amount" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Increase payment (amount)</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                    <depends>
+                        <field id="*/*/extracharge">1</field>
+                    </depends>
+                </field>
+                <field id="extracharge_percent" translate="label comment" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Increase payment (percent)</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                    <comment>Payment will be increased by greater of these amounts</comment>
+                    <depends>
+                        <field id="*/*/extracharge">1</field>
+                    </depends>
+                </field>
+                <field id="ga_gross_price" translate="label comment" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Analytics - send amount with tax</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>With gross price</comment>
+                </field>
+                <!-- to make visible set showIn.. on 1-->
+                <field id="ga_before_payment" translate="label comment" type="select" sortOrder="6" showInDefault="0" showInWebsite="0" showInStore="0">
+                    <label>Google Analytics code</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>By default, the Google Analytics tracking code is placed on the confirmation page</comment>
+                </field>
+            </group>
+            <!--<group id="multicurr" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Subaccounts currency</label>
+                <field id="multicurr_list" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Currency list</label>
+                    <source_model>Dialcom\Przelewy\Model\Config\Waluty</source_model>
+                    <comment>Available currency in store</comment>
+                </field>
+                <field id="multicurr_shopid" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>multicurr_shopid</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+                <field id="multicurr_merchantid" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>multicurr_merchantid</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+                <field id="multicurr_salt" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>multicurr_salt</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+                <field id="multicurr_api" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>multicurr_api</label>
+                    <backend_model>Dialcom\Przelewy\Model\AdvancedValidator</backend_model>
+                </field>
+            </group>-->
+        </section>
+    </system>
+</config>

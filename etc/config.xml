@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <dialcom_przelewy translate="text">
+                <active>0</active>
+                <model>Dialcom\Przelewy\Model\Payment\Przelewy</model>
+                <order_status>pending_payment</order_status>
+                <title>Przelewy24</title>
+                <text>After order placing, you will be redirect to the Przelewy24 service.</text>
+                <min_order_total>0</min_order_total>
+                <max_order_total>0</max_order_total>
+            </dialcom_przelewy>
+        </payment>
+        <przelewy_settings>
+            <oneclick>
+                <oneclick>0</oneclick>
+                <payinshop>0</payinshop>
+            </oneclick>
+            <paymethods>
+                <showpaymethods>0</showpaymethods>
+                <paymethod_first>25,31,112,20,65</paymethod_first>
+            </paymethods>
+            <paysettings>
+                <usegraphical>1</usegraphical>
+                <p24regulations>0</p24regulations>
+                <installment>0</installment>
+                <payslow>0</payslow>
+                <timelimit>15</timelimit>
+                <ivr>0</ivr>
+                <chg_state>1</chg_state>
+                <mk_invoice>1</mk_invoice>
+                <wait_for_result>0</wait_for_result>
+            </paysettings>
+            <additionall>
+                <extracharge>0</extracharge>
+                <extracharge_amount>0</extracharge_amount>
+                <extracharge_percent>0</extracharge_percent>
+                <ga_gross_price>1</ga_gross_price>
+                <ga_before_payment>0</ga_before_payment>
+            </additionall>
+        </przelewy_settings>
+    </default>
+</config>

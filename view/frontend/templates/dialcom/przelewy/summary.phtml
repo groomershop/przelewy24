@@ -1,0 +1,112 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
+$tr = $this->helper('Magento\Checkout\Helper\Data');
+$order_id = (int)$this->getRequest()->getParam('order_id');
+$_order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+$_order_items = $_order->getItemsCollection()
+    ->addAttributeToSelect('*')
+    ->addAttributeToFilter('product_type', array('eq' => 'simple'))
+    ->load();
+?>
+
+    <div class="order-details-items ordered">
+        <div class="table-wrapper order-items">
+            <table class="data table table-order-items" id="my-orders-table" summary="Items Ordered">
+                <caption class="table-caption"><?php echo __('Items Ordered'); ?></caption>
+                <thead>
+                <tr>
+                    <th class="col name"><?php echo __('Product Name'); ?></th>
+                    <th class="col sku"><?php echo __('SKU'); ?></th>
+                    <th class="col price"><?php echo __('Price'); ?></th>
+                    <th class="col qty"><?php echo __('Ordered qty'); ?></th>
+                    <th class="col qty"><?php echo __('Canceled qty'); ?></th>
+                    <th class="col tax-amount"><?= $block->escapeHtml(__('Tax Amount')) ?></th>
+                    <th class="col tax-percent"><?= $block->escapeHtml(__('Tax Percent')) ?></th>
+                    <th class="col discount-amount"><?= $block->escapeHtml(__('Discount Amount')) ?></th>
+                    <th class="col subtotal"><?php echo __('Subtotal'); ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($_order_items as $_item) : ?>
+                    <tr id="order-item-row-"<?php echo (int) $_item->getId() ?>>
+                        <td class="col name" data-th="Product Name">
+                            <strong class="product name product-item-name"><?php echo $this->escapeHtml($_item->getName()) ?></strong>
+                        </td>
+                        <td class="col sku" data-th="SKU"><?php echo $_item->getSku(); ?></td>
+                        <td class="col price" data-th="Price">
+                    <span class="price-excluding-tax" data-label="Excl. Tax">
+                        <span class="cart-price">
+                            <span class="price"><?php echo $_order->formatPrice($_item->getPrice() * 1) ?></span>
+                        </span>
+                    </span>
+                        </td>
+                        <td class="col qty" data-th="Qty">
+                            <span class="items-qty">
+                                <?= (int)$_item->getQtyOrdered(); ?>
+                            </span>
+                        </td>
+                        <td class="col qty" data-th="Canceled qty">
+                            <span class="items-qty">
+                                <?= (int)$_item->getQtyCanceled(); ?>
+                            </span>
+                        </td>
+                        <td class="col tax-amount">
+                            <?= /* @noEscape */ $_order->formatPrice($_item->getBaseTaxAmount()) ?>
+                        </td>
+                        <td class="col tax-percent"><?= $block->escapeHtml((int)$_item->getTaxPercent().'%') ?></td>
+                        <td class="col discount">
+                            <?= /* @noEscape */ $_order->formatPrice($_item->getDiscountAmount()) ?>
+                        </td>
+                        <td class="col subtotal" data-th="Subtotal">
+                        <span class="price-excluding-tax" data-label="Excl. Tax">
+                            <span class="cart-price">
+                                <span class="price"><?php echo $_order->formatPrice($_item->getRowTotal() * 1) ?></span>
+                            </span>
+                        </span>
+                        </td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+                <tfoot>
+                <tr class="subtotal">
+                    <th colspan="8" class="mark" scope="row"><?php echo __('Subtotal') ?></th>
+                    <td class="amount" data-th="Subtotal">
+                        <span class="price"><?php echo $_order->formatPrice($_order->getSubtotal() * 1) ?></span>
+                    </td>
+                </tr>
+                <tr class="shipping">
+                    <th colspan="8" class="mark" scope="row"><?php echo __('Shipping &amp; Handling') ?></th>
+                    <td class="amount" data-th="Shipping &amp; Handling">
+                        <span class="price"><?php echo $_order->formatPrice($_order->getShippingAmount() * 1) ?></span>
+                    </td>
+                </tr>
+                <tr class="grand_total">
+                    <th colspan="8" class="mark" scope="row">
+                        <strong><?php echo __('Total') ?></strong>
+                    </th>
+                    <td class="amount" data-th="Grand Total">
+                        <strong><span class="price"><?php echo $_order->formatPrice($_order->getGrandTotal() * 1) ?></span></strong>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+<?php
+if ($_order && $_order->getBaseTotalDue() > 0) { // jeśli jest coś jeszcze do zapłacenia to pokaż przyciski
+    $incrementid = $_order->getIncrementId();
+    $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
+    $form = $helper->getFormFactory();
+    $form->setAction($przelewy->getPaymentURI($_order->getOrderCurrencyCode()))->setId('przelewy_przelewy_checkout')->setName('przelewy_przelewy_checkout')->setMethod('POST')->setUseContainer(true);
+    foreach ($przelewy->getRedirectionFormData($incrementid) as $field => $value) {
+        if (!in_array($field, array('p24_method'))) {
+            $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
+        }
+    }
+    $form->addField('submit', 'submit', array('name' => 'submit', 'class' => 'p24-button', 'value' => __('Pay with Przelewy24')));
+    echo '<div class="p24-payment-form" style="text-align: right">', $form->toHtml(), '</div>';
+}
+
+?>

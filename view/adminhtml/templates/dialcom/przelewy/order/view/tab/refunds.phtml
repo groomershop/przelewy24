@@ -1,0 +1,163 @@
+<section class="admin__page-section order-view-account-information">
+    <div class="admin__page-section-title">
+        <span class="title"><?php echo __('Przelewy24 - Refunds'); ?></span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-information">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?php echo __('Send refund to Przelewy24') ?></span>
+            </div>
+            <div class="admin__page-section-item-content" id="order_p24_refunds_block">
+                <div id="messageContainer"></div>
+                <?php if (!$this->isSoapExtensionInstalled()) { ?>
+                    <div class="message message-error error"><?php echo __('SOAP extension is not installed!') ?></div>
+                <?php } else {
+                    $refundsData = $this->getRefunds();
+                    $amount = isset($refundsData['amount']) ? $refundsData['amount'] : 0.0;
+                    if ($amount > 0) {
+                        $refunds = isset($refundsData['refunds']) && is_array($refundsData['refunds']) ? $refundsData['refunds'] : array();
+                        $formattedPrice = $this->formatCurrency($amount);
+                        $formattedGrandTotal = number_format($amount, 2, '.', '');
+                        ?>
+                        <table class="admin__table-secondary">
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <?php echo __('Here you can send a refund to the customer. The amount of the refund may not exceed the value of the transaction and the amount of funds available in your account.') ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>
+                                        <?php echo __('Amount to refund') . ': <span id="allowedAmount">' . $formattedPrice . ' </span>'; ?>
+                                    </strong>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="p24-form-container">
+                            <form method="post" id="refundsP24Form">
+                                <?php echo $this->buildRefundsForm($formattedGrandTotal); ?>
+                            </form>
+                        </div>
+                        <div class="buttons-set a-right" id="refundSubmitButton">
+                            <button type="submit" class="action-default scalable action-save action-secondary" onclick="if(confirm(
+                                '<?php echo __('This will generate outgoing transfer. Can you confirm the operation?'); ?>'
+                                )) {
+                                submitP24RefundsArea($('order_p24_refunds_block'),
+                                '<?php echo filter_var($this->getSubmitUrl(), FILTER_SANITIZE_URL); ?>'
+                                )}">
+                        <span>
+                            <span>
+                                <span>
+                                    <?php echo __('Send') ?>
+                                </span>
+                            </span>
+                        </span>
+                            </button>
+                        </div>
+                        <?php
+                    } else {
+                        ?>
+                        <div class="message message-warning warning"><?php echo __('The payment has already been fully refunded - no funds to make further returns.') ?></div>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+        </div>
+
+        <div class="admin__page-section-item order-account-information">
+            <div class="admin__page-section-item-title">
+                <span class="title"><?php echo __('Przelewy24 - refunds list') ?></span>
+                <div class="actions"></div>
+            </div>
+            <div class="admin__page-section-item-content" id="order_p24_refunds_block_list">
+                <?php if (!$this->isSoapExtensionInstalled()) { ?>
+                    <div class="message message-error error"><?php echo __('SOAP extension is not installed!') ?></div>
+                <?php } else {
+                    if (!isset($refunds)) {
+                        $refunds = isset($refundsData['refunds']) && is_array($refundsData['refunds']) ? $refundsData['refunds'] : array();
+                    }
+                    ?>
+                    <table cellspacing="0" id="refundsP24Table">
+                        <?php echo $this->buildRefundsTable($refunds); ?>
+                    </table>
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    #order_p24_refunds_block_list table, td, th {
+        border: none;
+    }
+
+    #order_p24_refunds_block_list table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #order_p24_refunds_block_list th {
+        height: 30px;
+    }
+
+    .p24-form-container input {
+        width: 100%;
+    }
+
+    .buttons-set button {
+        float: right;
+        margin-top: 20px;
+    }
+
+</style>
+<script>
+    function submitP24RefundsArea(area, url) {
+        if ($(area)) {
+            var fields = $(area).select('input', 'select', 'textarea');
+            var data = Form.serializeElements(fields, true);
+            url = url + (url.match(new RegExp('\\?')) ? '&isAjax=true' : '?isAjax=true');
+            new Ajax.Request(url, {
+                parameters: $H(data),
+                loaderArea: area,
+                onSuccess: function (transport) {
+                    try {
+                        if (transport.responseText.isJSON()) {
+                            var response = transport.responseText.evalJSON();
+                            if (response.error) {
+                                $('messageContainer').update(getP24ErrorMessage(response.message));
+                            } else {
+                                $('messageContainer').update(getP24SuccessMessage(response.message));
+                                if (response.data) {
+                                    $('allowedAmount').update(response.data.allowedAmount);
+                                    $('refundsP24Form').update(response.data.form);
+                                    $('refundsListErrorMessage').update('');
+                                    $('refundsP24Table').update(response.data.table);
+                                    if (response.data.blocked) {
+                                        $('refundSubmitButton').hide();
+                                    }
+                                }
+                            }
+                        } else {
+                            $('messageContainer').update(getP24SuccessMessage(transport.responseText));
+                        }
+                    }
+                    catch (e) {
+                        $('messageContainer').update(getP24ErrorMessage(e));
+                    }
+                }
+            });
+        }
+    }
+
+    function getP24ErrorMessage(message) {
+        return '<div class="message message-error error">' + message + '</div>';
+    }
+
+    function getP24SuccessMessage(message) {
+        return '<div class="message message-success success">' + message + '</div>';
+    }
+</script>

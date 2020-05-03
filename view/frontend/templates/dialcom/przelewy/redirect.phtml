@@ -1,0 +1,225 @@
+<?php
+use Dialcom\Przelewy\Model\Config\Waluty;
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
+
+$gaBeforePayment = (int)$helper->getConfig('przelewy_settings/additionall/ga_before_payment');
+$payInShopByCard = $objectManager->get('Magento\Framework\Registry')->registry('payInShopByCard');
+
+if ($gaBeforePayment === 1 && !$payInShopByCard) { //TODO - not working - this is ga_before_payment feature
+    $order_id = (int) $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
+    $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId)
+    ?>
+    <div class="page-title">
+        <h1><?php echo __('Order payment') ?></h1>
+    </div>
+    <?php echo $this->getMessagesBlock()->toHtml() ?>
+    <h2 class="sub-title"><?php echo __('To confirm your order make the payment by clicking on the link below') ?></h2>
+
+    <div class="buttons-set">
+        <button type="button" class="button" title="<?php echo __('Make a payment') ?>"
+                onclick="window.location='<?php echo filter_var($block->getUrl('przelewy/przelewy/payment'), FILTER_SANITIZE_URL); ?>'">
+            <span>
+                <span><?php echo __('Make a payment') ?></span>
+            </span>
+        </button>
+    </div>
+    <div class="buttons-set">
+        <button type="button" class="button" title="<?php echo __('Send email') ?>"
+                onclick="window.location='<?php echo filter_var($block->getUrl('przelewy/przelewy/paymentlink', array('order_id' => $order_id)), FILTER_SANITIZE_URL); ?>'">
+            <span>
+                <span><?php echo __('Send email') ?></span>
+            </span>
+        </button>
+    </div>
+    <?php
+
+    echo $this->getLayout()->createBlock('core/template')->setData('ga_order_id', $order_id)->setTemplate('Dialcom_Przelewy::dialcom/przelewy/ga.phtml')->toHtml();
+
+} else {
+    $orderId = (int) $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
+    $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
+    $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
+    $store_id = $order->getStoreId();
+    $fullConfig = Waluty::getFullConfig($order->getOrderCurrencyCode(), null, $store_id);
+
+    $P24C = new Dialcom\Przelewy\Przelewy24Class(
+        $fullConfig['merchant_id'],
+        $fullConfig['shop_id'],
+        $fullConfig['salt'],
+        ($helper->getConfig(\Dialcom\Przelewy\Helper\Data::XML_PATH_MODE) == '1'));
+    $postData = $przelewy->getRedirectionFormData($orderId);
+
+    foreach ($postData as $k => $v) {
+        $P24C->addValue($k, $v);
+    }
+    $p24sign = $P24C->trnDirectSign($postData);
+    $token = $P24C->trnRegister();
+    if (is_array($token)) {
+        if (isset($token['token'])) {
+            $token = $token['token'];
+        } else {
+            $akeys = array_keys($token);
+            $token = array_shift($akeys);
+        }
+
+        $p24jsURL = filter_var($P24C->getHost() . 'inchtml/ajaxPayment/ajax.js?token=' . $token, FILTER_SANITIZE_URL);
+        $p24cssURL = filter_var($P24C->getHost() . 'inchtml/ajaxPayment/ajax.css', FILTER_SANITIZE_URL);
+    }
+    $order->setData('p24_session_id', $postData['p24_session_id']);
+    $order->save();
+    ?>
+    <div id="P24FormArea">
+        <div id="P24FormContainer"
+             data-sign="<?php echo $p24sign; ?>"
+             data-successCallback="finishPaymentFunction"
+             data-failureCallback="paymentErrorFunction"
+             data-dictionary='{"cardHolderLabel":"<?php echo __('Cardholder name') ?>",
+             "cardNumberLabel":"<?php echo __('Card number') ?>",
+             "cvvLabel":"<?php echo __('cvv') ?>",
+             "expDateLabel":"<?php echo __('Expiry date') ?>",
+             "payButtonCaption":"<?php echo __('Confirm') ?>",
+             "threeDSAuthMessage":"<?php echo __('Click here to continue shopping') ?>"}'>
+        </div>
+    </div>
+
+
+    <style>
+        #P24FormAreaHolder {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+        }
+
+        #P24FormArea {
+            background: lightgray;
+            background: linear-gradient(to bottom, #ddd 0%, #bbb 100%);
+            border-radius: 10px;
+            padding: 1em;
+            margin-bottom: 0.5em;
+            width: 350px;
+            height: 200px;
+        }
+
+        .loading {
+            background: transparent url(/img/loadingAnimation.gif) center center no-repeat;
+            min-height: 60px;
+        }
+
+        #P24_cardHolder, #P24_cardNumber {
+            padding-left: 0.3em;
+        }
+
+        #P24FormContainer {
+            min-height: 170px;
+        }
+
+        #P24FormContainer button:hover {
+            background: #3aa04c;
+            background: linear-gradient(to bottom, #3aa04c 0%, #3aa04a 100%);
+        }
+
+        #P24FormContainer p {
+            margin: 0;
+            margin-bottom: 0.5em;
+        }
+
+        #P24FormContainer button {
+            border-radius: 4px;
+            font-size: 20px;
+            line-height: 24px;
+            color: #fff;
+            padding: 0;
+            font-weight: bold;
+            background: #43b754;
+            background: linear-gradient(to bottom, #43b754 0%, #41b757 2%, #41b854 4%, #43b756 6%, #41b354 38%, #44b355 40%, #45af55 66%, #41ae53 74%, #42ac52 91%, #41ae55 94%, #43ab54 96%, #42ac52 100%);
+            border: 1px solid;
+            border-color: #399a49 #247f32 #1a6d27 #399a49;
+            padding: 11px 15px 10px 15px;
+            margin: 10px 0 0 100px;
+        }
+
+        #P24FormContainer button:hover {
+            background: #e94a59;
+            background: linear-gradient(to bottom, #f87582 0%, #e94a59 100%);
+        }
+
+        #P24FormContainer button {
+            border-radius: 4px;
+            font-size: 20px;
+            line-height: 24px;
+            color: #fff;
+            padding: 0;
+            font-weight: bold;
+            background: #db2032;
+            background: linear-gradient(to bottom, #e94a59 0%, #db2032 100%);
+            border: 1px solid;
+            border-color: #af0d1d #e94a59 #89000d #af0d1d;
+            padding: 11px 15px 10px 15px;
+            margin: 10px auto 0 auto;
+            display: block;
+        }
+
+        #P24FormContainer input {
+            border: none;
+            border-radius: 4px;
+            height: 23px;
+            max-width: 190px;
+        }
+
+        #P24FormArea span.info {
+            margin: 3em 0;
+            display: block;
+            text-align: center;
+        }
+
+        .inactive {
+            opacity: 0.3;
+            -webkit-filter: grayscale(1);
+            -moz-filter: grayscale(1);
+            -ms-filter: grayscale(1);
+            -o-filter: grayscale(1);
+            filter: grayscale(1);
+            filter: gray;
+        }
+    </style>
+
+
+    <script>
+        require(['jquery'], function ($) {
+            $(document).ready(function () {
+                $('head').append('<link rel="stylesheet" type="text/css" href="<?php echo filter_var($p24cssURL, FILTER_SANITIZE_URL); ?>" />');
+                $.getScript('<?php echo filter_var($p24jsURL, FILTER_SANITIZE_URL); ?>', function () {
+                    window.setTimeout(function () {
+                        $('#P24FormContainer button').on('click', function () {
+                            window.setTimeout(function () {
+                                if ($('#P24FormContainer .P24_input_error').length == 0) {
+                                    $('#P24FormContainer button').attr('disabled', true).addClass('inactive');
+                                }
+                            }, 100);
+                        });
+                        window.setTimeout(function () {
+                            if (jQuery('#P24FormContainer > form').length < 1) {
+                                P24_Transaction.init();
+                            }
+                        }, 1000);
+                    }, 1000);
+                });
+            });
+        });
+
+        function paymentErrorFunction() {
+            window.location = '<?php echo filter_var($block->getUrl('przelewy/przelewy/failure', array('ga_order_id' => $orderId)), FILTER_SANITIZE_URL); ?>';
+        }
+
+        function finishPaymentFunction(orderId) {
+            window.location = '<?php echo filter_var($block->getUrl('przelewy/przelewy/success', array('ga_order_id' => $orderId)), FILTER_SANITIZE_URL); ?>';
+        }
+    </script>
+<?php } ?>
+

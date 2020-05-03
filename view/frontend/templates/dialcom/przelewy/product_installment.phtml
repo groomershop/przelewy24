@@ -1,0 +1,30 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
+$productPrice = $objectManager->get('Magento\Framework\Registry')->registry('current_product')->getFinalPrice();
+$storeMeneger = $objectManager->get('Magento\Store\Model\StoreManagerInterface');
+$currency = $storeMeneger->getStore()->getCurrentCurrency()->getCode();
+
+if (
+    (int)$helper->getConfig(\Dialcom\Przelewy\Helper\Data::XML_PATH_INSTALLMENT) == \Dialcom\Przelewy\Model\Config\Installment::SHOW_ALL
+    && $productPrice >= \Dialcom\Przelewy\Model\Payment\Przelewy::getMinRatyAmount()
+    && $currency == "PLN"
+) {
+
+    $jsonString = \Dialcom\Przelewy\Model\Payment\Przelewy::requestGet('https://secure.przelewy24.pl/kalkulator_raty.php?ammount=' . ($productPrice * 100) . '&format=json');
+    $json = json_decode($jsonString);
+    ?>
+
+    <script type="text/javascript">
+        require(['jquery'], function ($) {
+            $(document).ready(function () {
+                $('.price-box:first').append('<a class="price-installment" ' +
+                    'target="_blank" href="https://secure.przelewy24.pl/kalkulator_raty/index.html?ammount=<?php echo $productPrice; ?>' +
+                    '"><img src="<?php echo $this->getViewFileUrl('Dialcom_Przelewy::images/logo_129.gif '); ?>"><br> <?php echo $json->ilosc_rat; ?> rat x ~<?php echo $json->rata; ?> zł </a><a class="price-installment" ' +
+                    'target="_blank" href="http://www.mbank.net.pl/mraty_1/index.html?kwota=<?php echo $productPrice; ?>' +
+                    '"><img src="<?php echo $this->getViewFileUrl('Dialcom_Przelewy::images/logo_136.gif '); ?>"  </a>');
+            });
+        });
+    </script>
+
+<?php } ?>

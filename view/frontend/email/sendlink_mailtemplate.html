@@ -1,0 +1,17 @@
+<!--@subject {{trans 'The link for payment with Przelewy24' }}@-->
+<!--@vars {
+"var order.customer_name":"Customer Name",
+"var order.increment_id":"Order id",
+"var payment_link":"Payment link"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<p>{{trans "Hello"}}{{trans " %name," name=$order.customer_name}}</p>
+<p>
+    {{trans 'Your order' }}{{trans ' %orderId ' orderId=$order.increment_id }}{{trans 'has not been paid.' }}<br>
+    {{trans 'To continue the payment, click the link below:' }}<br>
+    <a href="{{trans '%payment_link' payment_link=$payment_link |raw }}">{{trans 'The link for payment with Przelewy24' }} </a>
+</p>
+
+{{template config_path="design/email/footer_template"}}

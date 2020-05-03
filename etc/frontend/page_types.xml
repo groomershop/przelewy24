@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<page_types xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_types.xsd">
+    <type id="przelewy_przelewy_mycards" label="Przelewy24 - My cards"/>
+    <type id="przelewy_przelewy_redirect" label="Przelewy24 - Redirect"/>
+    <type id="przelewy_przelewy_summary" label="Przelewy24 - Summary"/>
+</page_types>
