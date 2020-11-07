@@ -581,19 +581,33 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         $extraChargeProduct = (int)$this->scopeConfig->getValue(Data::XML_PATH_EXTRACHARGE_PRODUCT, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
         $extraChargeAmount = $this->getExtraChargeAmountByOrder($order);
 
-        if ($extraChargeEnabled && $extraChargeProduct > 0 && $extraChargeAmount > 0) {
-            /** @var \Magento\Catalog\Model\Product $product */
-            $product = $this->objectManager->create('Magento\Catalog\Model\Product')->load($extraChargeProduct);
+        if (!$extraChargeEnabled || $extraChargeProduct <= 0 || $extraChargeAmount <= 0) {
+            return;
+        }
 
-            $rowTotal = round($extraChargeAmount / 100, 2);
+        /** @var \Magento\Catalog\Model\Product $product */
+        $product = $this->objectManager->create('Magento\Catalog\Model\Product')->load($extraChargeProduct);
 
-            foreach ($order->getAllItems() as $item) {
-                if ($item->getSku() === $product->getSku()) {
-                    return;
-                }
+        $rowTotal = round($extraChargeAmount / 100, 2);
+
+        $extraChargeAlreadyInCart = false;
+        // if "Extra Charge" virtual product is already in the cart,
+        // we update it's price and qty
+        foreach ($order->getAllItems() as $item) {
+            if ($item->getSku() === $product->getSku()) {
+                $extraChargeAlreadyInCart = true;
+
+                $item->setPrice($rowTotal)
+                    ->setBasePrice($rowTotal)
+                    ->setOriginalPrice($rowTotal)
+                    ->setRowTotal($rowTotal)
+                    ->setBaseRowTotal($rowTotal)
+                    ->setQtyOrdered(1);
             }
+        }
 
-            try {
+        try {
+            if (!$extraChargeAlreadyInCart) {
                 $orderItem = $this->objectManager->create('Magento\Sales\Model\Order\Item')
                     ->setStoreId($order->getStore()->getStoreId())
                     ->setQuoteItemId(null)
@@ -613,14 +627,14 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
                     ->setOrder($order);
 
                 $order->addItem($orderItem);
-
-                $order->setSubtotal($rowTotal + $order->getSubtotal())
-                    ->setBaseSubtotal($rowTotal + $order->getBaseSubtotal())
-                    ->setGrandTotal($rowTotal + $order->getGrandTotal())
-                    ->setBaseGrandTotal($rowTotal + $order->getBaseGrandTotal());
-            } catch (\Exception $e) {
-                $this->logger->debug([__METHOD__ . ' ' . $e->getMessage()]);
             }
+
+            $order->setSubtotal($rowTotal + $order->getSubtotal())
+                ->setBaseSubtotal($rowTotal + $order->getBaseSubtotal())
+                ->setGrandTotal($rowTotal + $order->getGrandTotal())
+                ->setBaseGrandTotal($rowTotal + $order->getBaseGrandTotal());
+        } catch (\Exception $e) {
+            $this->logger->debug([__METHOD__ . ' ' . $e->getMessage()]);
         }
     }
 

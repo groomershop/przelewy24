@@ -10,6 +10,8 @@
 
 namespace Dialcom\Przelewy;
 
+use Exception;
+
 require_once  dirname(__FILE__) . '/SharedLibraries/autoloader.php';
 /**
  *
@@ -20,6 +22,11 @@ define('P24_VERSION', '3.2');
 if (class_exists('Przelewy24Class', false) != true) {
     class  Przelewy24Class
     {
+        /**
+         * Custom status for new orders, which may be visible on storefront
+         */
+        const PENDING_PAYMENT_CUSTOM_STATUS = 'pending_payment_przelewy24';
+
         /**
          * Live system URL address
          * @var string
@@ -387,7 +394,7 @@ if (class_exists('Przelewy24Class', false) != true) {
 
             for ($i = ($verification ? 0 : 1); $i < ($verification ? 4 : count($mandatory)); $i++) {
                 if (!in_array($mandatory[$i], $keys)) {
-                    throw new \Exception('Field ' . $mandatory[$i] . ' is required for ' . $action . ' request!');
+                    throw new Exception('Field ' . $mandatory[$i] . ' is required for ' . $action . ' request!');
                 }
             }
             return true;

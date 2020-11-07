@@ -41,6 +41,7 @@
 "Error","Błąd"
 "Completed","Zrealizowany"
 "Pending","Oczekuje"
+"Pending Payment P24","Oczekuje"
 "Rejected","Odrzucony"
 "Unknown status","Nierozpoznany status"
 "This will generate outgoing transfer. Can you confirm the operation?","Zostanie wygenerowany przelew wychodzący. Czy potwierdzasz operację?"
@@ -175,3 +176,4 @@
 "Discount Amount","Zniżka"
 "Ordered qty","Ilość zamówionych"
 "Canceled qty","Ilość anulowanych"
+"Please accept Przelewy24 terms.","Prosimy zaakceptować warunki płatności Przelewy24."

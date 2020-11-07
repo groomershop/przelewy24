@@ -41,6 +41,7 @@
 "Error","Hiba"
 "Completed","Befejezve"
 "Pending","Függõben"
+"Pending Payment P24","Függõben"
 "Rejected","Visszautasítva"
 "Unknown status","Ismeretlen státusz"
 "This will generate outgoing transfer. Can you confirm the operation?","Ez elindítja a kimenõ átutalást. Jóváhagyja a mûveletet?"

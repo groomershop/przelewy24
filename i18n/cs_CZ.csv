@@ -41,6 +41,7 @@
 "Error","Chyba"
 "Completed","Provedeno"
 "Pending","Čeká na vyřízení"
+"Pending Payment P24","Čeká na vyřízení"
 "Rejected","Zamítnuto"
 "Unknown status","Neznámý status"
 "This will generate outgoing transfer. Can you confirm the operation?","Bude vygenerována odchozí platba. Potvrdit operaci?"
