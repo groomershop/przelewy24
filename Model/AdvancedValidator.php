@@ -129,7 +129,7 @@ class  AdvancedValidator extends \Magento\Framework\App\Config\Value
     {
         return self::getScopeNameFromUrl();
     }
-    public function save()
+    public function beforeSave()
     {
         $path = $this->getPath();
         $field = substr($path, strrpos($path, '/') + 1);
@@ -148,7 +148,7 @@ class  AdvancedValidator extends \Magento\Framework\App\Config\Value
             $this->validateExtraChargePercent();
         }
 
-        parent::save();
+        parent::beforeSave();
     }
 
     private function validateApiKey()
