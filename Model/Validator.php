@@ -43,7 +43,7 @@ class Validator extends \Magento\Framework\App\Config\Value
         );
     }
 
-    public function save()
+    public function beforeSave()
     {
         if ((int)$this->getFieldsetDataValue('active') == 1) {
             $path = $this->getPath();
@@ -75,7 +75,7 @@ class Validator extends \Magento\Framework\App\Config\Value
                     throw new \Magento\Framework\Exception\LocalizedException($phrase);
                 }
             }
-            parent::save();
         }
+        parent::beforeSave();
     }
 }
