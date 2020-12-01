@@ -1,4 +1,4 @@
-require(['jquery', 'mage/translate'], function ($, ui, mage) {
+require(['jquery', 'mage/translate'], function ($, mage) {
     function getBanksList() {
         var banksList = [];
         $('#przelewy_settings_paymethods_paymethods_all option').each(function () {
