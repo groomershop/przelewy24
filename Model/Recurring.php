@@ -199,7 +199,7 @@ class Recurring extends \Magento\Framework\Model\AbstractModel
         }
     }
 
-    private function refIdForCardId($card_id)
+    public function refIdForCardId($card_id)
     {
         try {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
@@ -214,7 +214,7 @@ class Recurring extends \Magento\Framework\Model\AbstractModel
         $customerSession = $this->objectManager->get('Magento\Customer\Model\Session');
         $order_id = (int) $order_id;
         if ($customerSession->isLoggedIn()) {
-            $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+            $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($order_id);
             $storeId = $order->getStoreId();
 
             $customer = $customerSession->getCustomer();

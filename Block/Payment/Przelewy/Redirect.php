@@ -33,13 +33,21 @@ class Redirect extends \Magento\Framework\View\Element\AbstractBlock
         );
     }
 
+    /**
+     * Warning:
+     * Magento order related functions names are confusing
+     * @see Przelewy::getRedirectionFormData comment for more details
+     *
+     * @return string
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
     protected function _toHtml()
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $order_id = (int) !is_null($this->orderId) ? $this->orderId : $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
+        $calculatedOrderId = !is_null($this->orderId) ? $this->orderId : $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
 
-        if (!is_null($order_id)) {
-            $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+        if ($calculatedOrderId) {
+            $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($calculatedOrderId);
             $order->addStatusToHistory(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT, __('Waiting for payment.'));
             $order->setSendEmail(true);
             $order->save();
@@ -56,7 +64,7 @@ class Redirect extends \Magento\Framework\View\Element\AbstractBlock
             ->setMethod('POST')
             ->setUseContainer(true);
 
-        foreach ($przelewy->getRedirectionFormData($order_id) as $field => $value) {
+        foreach ($przelewy->getRedirectionFormData($calculatedOrderId) as $field => $value) {
             $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
         }
 
@@ -68,9 +76,10 @@ class Redirect extends \Magento\Framework\View\Element\AbstractBlock
         return $html;
     }
 
-    public function getHtml($order_id)
+    public function getHtml($orderId)
     {
-        $this->orderId = (int) $order_id;
+        $this->orderId = $orderId;
+
         return $this->_toHtml();
     }
 }

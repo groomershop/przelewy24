@@ -320,7 +320,8 @@ HTML;
         $payment_list = $this->originalPaymentList;
 
         if ($this->lastPaymentMethod) {
-            $bankText .= $this->method->getBlock()->getBankTxt($this->lastPaymentMethod, __('Last used:') . $payment_list[$this->lastPaymentMethod], $first-- > 0);
+            $lastPayment = isset($payment_list[$this->lastPaymentMethod]) ? $payment_list[$this->lastPaymentMethod] : '';
+            $bankText .= $this->method->getBlock()->getBankTxt($this->lastPaymentMethod, __('Last used:') .$lastPayment, $first-- > 0);
             $makeUnfold = true;
         }
 

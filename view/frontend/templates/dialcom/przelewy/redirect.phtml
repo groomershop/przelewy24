@@ -8,8 +8,8 @@ $gaBeforePayment = (int)$helper->getConfig('przelewy_settings/additionall/ga_bef
 $payInShopByCard = $objectManager->get('Magento\Framework\Registry')->registry('payInShopByCard');
 
 if ($gaBeforePayment === 1 && !$payInShopByCard) { //TODO - not working - this is ga_before_payment feature
-    $order_id = (int) $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
-    $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId)
+    $order_id = $objectManager->get('Magento\Checkout\Model\Session')->getLastOrderId();
+    $order = $objectManager->create('Magento\Sales\Model\Order')->load($order_id)
     ?>
     <div class="page-title">
         <h1><?php echo __('Order payment') ?></h1>
@@ -38,8 +38,8 @@ if ($gaBeforePayment === 1 && !$payInShopByCard) { //TODO - not working - this i
     echo $this->getLayout()->createBlock('core/template')->setData('ga_order_id', $order_id)->setTemplate('Dialcom_Przelewy::dialcom/przelewy/ga.phtml')->toHtml();
 
 } else {
-    $orderId = (int) $objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
-    $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
+    $orderId = $objectManager->get('Magento\Checkout\Model\Session')->getLastOrderId();
+    $order = $objectManager->create('Magento\Sales\Model\Order')->load($orderId);
     $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
     $store_id = $order->getStoreId();
     $fullConfig = Waluty::getFullConfig($order->getOrderCurrencyCode(), null, $store_id);

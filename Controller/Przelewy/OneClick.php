@@ -3,6 +3,9 @@
 namespace Dialcom\Przelewy\Controller\Przelewy;
 
 use Dialcom\Przelewy\Helper\Data;
+use Dialcom\Przelewy\Services\PayloadForRestTransaction;
+use Dialcom\Przelewy\Services\RestCard;
+use Dialcom\Przelewy\Services\RestTransaction;
 use Magento\Sales\Model\Order;
 use Dialcom\Przelewy\Model\Payment\Przelewy;
 use Magento\Checkout\Model\Session;
@@ -40,40 +43,38 @@ class OneClick extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
-        $orderId = (int) $this->_objectManager->get(Session::class)->getLastRealOrderId();
-        $this->_objectManager->create(Przelewy::class)->addExtracharge($orderId);
+        $calculatedOrderId = $this->_objectManager->get(Session::class)->getLastRealOrderId();
 
-        $paymentData = $this->_objectManager
-            ->create(Order::class)
-            ->loadByIncrementId($orderId)
-            ->getPayment()
-            ->getData()
-        ;
+        $przelewyModel = $this->_objectManager->create(Przelewy::class);
+
+        $order = $this->_objectManager->create(Order::class)->loadByIncrementId($calculatedOrderId);
+        $przelewyModel->addExtracharge($order->getEntityId());
+
+        $paymentData = $order->getPayment()->getData();
         $additionalInformation = $paymentData['additional_information'];
         $recurring = $this->_objectManager->create(Recurring::class);
-        $result = $recurring->chargeCard($orderId, (int) $additionalInformation['cc_id']);
-        $order = $this->_objectManager->create(Order::class)->load($orderId);
         $storeId = $order->getStoreId();
-        if (!$result) {
-            return $this->_redirect('przelewy/przelewy/failure', ['ga_order_id' => $orderId]);
-        }
-        $order = $this->_objectManager->create(Order::class)->loadByIncrementId($orderId);
-        $chgState = (int) $this->scopeConfig->getValue(Data::XML_PATH_CHG_STATE, Scope::SCOPE_STORE, $storeId);
-        $mkInvoice = (int) $this->scopeConfig->getValue(Data::XML_PATH_MK_INVOICE, Scope::SCOPE_STORE, $storeId);
+        $cardRef = $recurring->refIdForCardId($additionalInformation['cc_id']);
 
-        if (1 === $chgState) {
-            $order->addStatusToHistory(Order::STATE_PROCESSING, __('The payment has been accepted.'), true);
-            $order->setState(Order::STATE_PROCESSING, true);
-            $order->save();
-            if (1 === $mkInvoice) {
-                $this->helper->makeInvoiceFromOrder($order);
-                $order->setSendEmail(true);
-            } else {
-                $order->setTotalPaid($order->getGrandTotal());
-            }
+        if (!$cardRef) {
+            return $this->_redirect('przelewy/przelewy/failure', ['ga_order_id' => $order->getIncrementId()]);
+            //return $this->_redirect('przelewy/przelewy/failure', ['ga_order_id' => $order->getEntityId()]);
         }
-        $order->save();
 
-        return $this->_redirect('przelewy/przelewy/success', ['ga_order_id' => $orderId]);
+        $transactionService = new RestTransaction($this->scopeConfig, $storeId);
+        $payload = $przelewyModel->getTransactionData($calculatedOrderId, $cardRef);
+        $resTransaction = $transactionService->register($payload);
+        if (isset($resTransaction['data']['token'])) {
+            $token = $resTransaction['data']['token'];
+        } else {
+            return $this->_redirect('przelewy/przelewy/failure', ['ga_order_id' => $order->getIncrementId()]);
+        }
+        $cardService = new RestCard($this->scopeConfig, $storeId);
+        $resCard = $cardService->chargeWith3ds($token);
+        if (!isset($resCard['data']['redirectUrl'])) {
+            return $this->_redirect('przelewy/przelewy/failure', ['ga_order_id' => $order->getIncrementId()]);
+        }
+
+        return $this->_redirect($resCard['data']['redirectUrl']);
     }
 }

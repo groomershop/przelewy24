@@ -18,9 +18,9 @@ class ReturnUrl extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         $requestParams = $this->getRequest()->getParams();
-        $orderId = (int) $requestParams['ga_order_id'];
+        $orderId = (string) $requestParams['ga_order_id'];
         
-        if (!is_null($orderId) && $orderId > 1) {
+        if (!is_null($orderId) && $orderId) {
             $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
             if ($order->getState() === \Magento\Sales\Model\Order::STATE_PROCESSING) {
                 $this->_redirect('przelewy/przelewy/success', $requestParams);

@@ -27,17 +27,15 @@ class Failure extends \Magento\Framework\App\Action\Action
     {
         $requestParams = $this->getRequest()->getParams();
         $session = $this->_objectManager->get('Magento\Checkout\Model\Session');
-        $order_id = (int) $requestParams['ga_order_id'];
+        $gaOrderId = isset($requestParams['ga_order_id']) ? $requestParams['ga_order_id'] : 0;
+        $order_id = $gaOrderId ? $requestParams['ga_order_id'] : $session->getLastRealOrderId();
+        $session->getQuote()->setIsActive(false)->save();
+        $this->messageManager->addSuccessMessage(__("Your payment was not confirmed by Przelewy24. Contact with your seller for more information."));
 
-        if (is_null($order_id) || $order_id < 1) {
-            $session->getQuote()->setIsActive(false)->save();
-            $this->messageManager->addSuccessMessage(__("Your payment was not confirmed by Przelewy24. Contact with your seller for more information."));
+        if (is_null($order_id) || $order_id) {
             $this->_redirect('checkout/onepage/success', array('ga_order_id' => 0));
         } else {
-            $ga_order_id = $this->helper->getGaOrderId($order_id);
-            $session->getQuote()->setIsActive(false)->save();
-            $this->messageManager->addSuccessMessage(__("Your payment was not confirmed by Przelewy24. Contact with your seller for more information."));
-            $this->_redirect('checkout/onepage/success', array('ga_order_id' => $ga_order_id));
+            $this->_redirect('checkout/onepage/success', array('ga_order_id' => $this->helper->getGaOrderId($order_id)));
         }
     }
 }

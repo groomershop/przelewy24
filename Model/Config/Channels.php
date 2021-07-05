@@ -92,7 +92,7 @@ class Channels
                 if (strpos($clientPhone, '+48') === 0) $clientPhone = substr($clientPhone, 3);
                 elseif (strpos($clientPhone, '0048') === 0) $clientPhone = substr($clientPhone, 4);
                 elseif (strpos($clientPhone, '48') === 0) $clientPhone = substr($clientPhone, 2);
-                $sessionId = substr((int) $order->getIncrementId() . '|' . md5(uniqid(mt_rand(), true) . ':' . microtime(true)), 0, 100);
+                $sessionId = substr((int) $order->getEntityId() . '|' . md5(uniqid(mt_rand(), true) . ':' . microtime(true)), 0, 100);
                 $res = $s->__call('TransactionMotoCallBackRegister', array(
                     'login' => $fullConfig['merchant_id'],
                     'pass' => $fullConfig['salt'],
@@ -100,8 +100,8 @@ class Channels
                         'clientPhone' => filter_var($clientPhone, FILTER_SANITIZE_STRING),
                         'amount' => number_format($order->getGrandTotal() * 100, 0, "", ""),
                         'currency' => filter_var($order->getOrderCurrencyCode(), FILTER_SANITIZE_STRING),
-                        'paymentId' => (int) $order->getIncrementId(),
-                        'description' => __('Order').' '. (int) $order->getIncrementId(),
+                        'paymentId' => (int) $order->getEntityId(),
+                        'description' => __('Order').' '. $order->getIncrementId(),
                         'sessionId' => $sessionId,
                         'clientEmail' => filter_var($order->getCustomerEmail(), FILTER_SANITIZE_EMAIL),
                         'merchantEmail' => filter_var($this->scopeConfig->getValue('trans_email/ident_general/email', \Magento\Store\Model\ScopeInterface::SCOPE_STORE),FILTER_SANITIZE_EMAIL),
@@ -134,9 +134,9 @@ class Channels
         $scopeId = AdvancedValidator::getStoreIdFromUrl();
         $scopeName = AdvancedValidator::getScopeNameFromUrl();
 
-        $order_id = (int) $this->objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
+        $order_id = $this->objectManager->get('Magento\Checkout\Model\Session')->getLastOrderId();
         if ($order_id != 0) {
-            $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+            $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($order_id);
             $scopeId = $order->getStoreId();
         }
         $fullConfig = Waluty::getFullConfig($currency, $this->scopeConfig, $scopeId, $scopeName);

@@ -5,6 +5,7 @@ namespace Dialcom\Przelewy\Model\Payment;
 use Dialcom\Przelewy\Helper\Data;
 use Dialcom\Przelewy\Model\Recurring;
 use Dialcom\Przelewy\Przelewy24Class;
+use Dialcom\Przelewy\Services\PayloadForRestTransaction;
 use Magento\Sales\Model\Order;
 
 class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
@@ -192,18 +193,45 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         return $this->objectManager->get('Magento\Checkout\Model\Session');
     }
 
-    public function getRedirectionFormData($orderId = null)
+    /**
+     * To remember:
+     *
+     * session:
+     *  getLastOrderId for internal use, int
+     *  getLastRealOrderId for external, string can contain prefixes
+     * order:
+     *  getEntityId - int id
+     *  getIncrementId - string can contain prefixes
+     * load by:
+     *  load - loads by entityId
+     *  loadByIncrementId - loads by calculatedId
+     * We should name
+     *  $entityOrderId for id internal.
+     *  $calculatedOrderId for outside-of-the-box purposes.
+     *
+     * Therefore
+     *  outside use of entity id is bad practice for security reasons.
+     *
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    public function getRedirectionFormData($calculatedOrderId = null)
     {
-
-        if (is_null($orderId)) {
-            $orderId = (int) $this->getCheckout()->getLastRealOrderId();
-        }else{
-            $orderId = (int) $orderId;
+        if (is_null($calculatedOrderId)) {
+            $calculatedOrderId = $this->getCheckout()->getLastOrderId();
         }
-        $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
+
+        $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($calculatedOrderId);
+        if(empty($order->getData())){
+            $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($calculatedOrderId);
+        }
         $this->storeId = $order->getStoreId();
-        $sessionId = Data::getSessionId($orderId);
-        $order->setData('p24_session_id', $sessionId);
+        $sessionId = $order->getData('p24_session_id');
+        if (!$sessionId) {
+            $sessionId = Data::getSessionId($order->getEntityId());
+            $order->setData('p24_session_id', $sessionId);
+        }
         $order->save();
         $amount = number_format($order->getGrandTotal() * 100, 0, "", "");
         $currency = $order->getOrderCurrencyCode();
@@ -215,7 +243,7 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
             'p24_email' => filter_var($order->getCustomerEmail(), FILTER_SANITIZE_EMAIL),
             'p24_amount' => $amount,
             'p24_currency' => $currency,
-            'p24_description' => filter_var(__('Order').' '. $orderId, FILTER_SANITIZE_STRING),
+            'p24_description' => filter_var(__('Order').' '. $calculatedOrderId, FILTER_SANITIZE_STRING),
             'p24_language' => strtolower(substr($this->objectManager->get('Magento\Framework\Locale\Resolver')->getLocale(), 0, 2)),
             'p24_client' => filter_var($order->getBillingAddress()->getData('firstname') . ' ' . $order->getBillingAddress()->getData('lastname'), FILTER_SANITIZE_STRING),
             'p24_address' => filter_var($order->getBillingAddress()->getData('street'), FILTER_SANITIZE_STRING),
@@ -224,7 +252,7 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
             'p24_country' => 'PL',
             'p24_encoding' => 'utf-8',
             'p24_url_status' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/status'),FILTER_SANITIZE_URL),
-            'p24_url_return' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/returnUrl', array('ga_order_id' => $orderId)),FILTER_SANITIZE_URL),
+            'p24_url_return' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/returnUrl', array('ga_order_id' => $calculatedOrderId)),FILTER_SANITIZE_URL),
             'p24_api_version' => filter_var(P24_VERSION, FILTER_SANITIZE_URL),
             'p24_ecommerce' => 'magento2_' . $this->objectManager->get('Magento\Framework\App\ProductMetadata')->getVersion(),
             'p24_ecommerce2' => $this->objectManager->get('Magento\Framework\Module\ModuleList')->getOne('Dialcom_Przelewy')['setup_version'],
@@ -278,6 +306,43 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 
         $this->P24->checkMandatoryFieldsForAction($data, 'trnDirect');
         return (array)@$data;
+    }
+
+    /**
+     * Get transaction data.
+     *
+     * @param int    $calculatedOrderId
+     * @param string $methodRefId
+     *
+     * @return PayloadForRestTransaction
+     * @throws \Exception
+     */
+    public function getTransactionData($calculatedOrderId, $methodRefId)
+    {
+        $data = $this->getRedirectionFormData($calculatedOrderId);
+        $statusUrl = $this->urlBuilder->getUrl('przelewy/przelewy/status', ['response' => 'rest']);
+        $payload = new PayloadForRestTransaction();
+        $payload->merchantId = (int)$data['p24_merchant_id'];
+        $payload->posId = (int)$data['p24_pos_id'];
+        $payload->sessionId = (string)$data['p24_session_id'];
+        $payload->amount = (int)$data['p24_amount'];
+        $payload->currency = (string)$data['p24_currency'];
+        $payload->description = (string)$data['p24_description'];
+        $payload->email = (string)$data['p24_email'];
+        $payload->client = (string)$data['p24_client'];
+        $payload->address = (string)$data['p24_address'];
+        $payload->zip = (string)$data['p24_zip'];
+        $payload->city = (string)$data['p24_city'];
+        $payload->country = (string)$data['p24_country'];
+        $payload->language = (string)$data['p24_language'];
+        $payload->urlReturn = (string)$data['p24_url_return'];
+        $payload->urlStatus = filter_var($statusUrl, FILTER_SANITIZE_URL);
+        $payload->regulationAccept = (bool)$data['p24_regulation_accept'];
+        $payload->shipping = (string)$data['p24_shipping'];
+        $payload->encoding = (string)$data['p24_encoding'];
+        $payload->methodRefId = (string)$methodRefId;
+
+        return $payload;
     }
 
     public function getMerchantId()
@@ -431,17 +496,18 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         'USA' => 'United States',
     );
 
-    /*
-     * Zwraca kwotę dodatkowej opłaty przy wyborze przelewy24 na podstawie order_id
-     * @param int
-     * @return float
+    /**
+     * Zwraca kwotę dodatkowej opłaty przy wyborze przelewy24 na podstawie order_id.
      *
-     * */
-    public function getExtrachargeAmount($order_id)
+     * @param string|int $orderId Internal order id (entityId)
+     *
+     * @return int|mixed
+     */
+    public function getExtrachargeAmount($orderId)
     {
-        $order_id = (int) $order_id;
-        $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+        $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($orderId);
         $amount = number_format($order->getGrandTotal() * 100, 0, "", "");
+
         return self::getExtrachargeAmountByAmount($amount);
     }
 
@@ -474,21 +540,17 @@ class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         return $extracharge_amount;
     }
 
-    /*
-     * Dodaje do zamówienia produkt wirtualny, extracharge
-     * @param int
-     * @return void
-     *
-     * */
+    /**
+     * @param string|int $order_id
+     */
     public function addExtracharge($order_id)
     {
-        $order_id = (int) $order_id;
         $extracharge_amount = self::getExtrachargeAmount($order_id);
         $extracharge_product = (int)$this->scopeConfig->getValue(Data::XML_PATH_EXTRACHARGE_PRODUCT, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
         if ($this->scopeConfig->getValue(Data::XML_PATH_EXTRACHARGE, \Magento\Store\Model\ScopeInterface::SCOPE_STORE) == 1 && $extracharge_amount > 0 && $extracharge_product > 0) {
 
-            $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+            $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($order_id);
             $product = $this->objectManager->create('Magento\Catalog\Model\Product')->load($extracharge_product);
 
             $foundExtracharge = false;

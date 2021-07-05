@@ -17,6 +17,9 @@ class BeforeSaveObserver implements ObserverInterface
     {
         /** @var Order $order */
         $order = $observer->getEvent()->getOrder();
+        if(null === $order->getPayment()){
+            return ;
+        }
 
         if (Przelewy::PAYMENT_METHOD_PRZELEWY_CODE !== $order->getPayment()->getMethodInstance()->getCode()) {
             return;

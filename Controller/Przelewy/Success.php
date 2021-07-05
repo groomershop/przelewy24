@@ -27,13 +27,13 @@ class Success extends \Magento\Framework\App\Action\Action
     {
         $requestParams = $this->getRequest()->getParams();
         $session = $this->_objectManager->get('Magento\Checkout\Model\Session');
-        $order_id = (int) $requestParams['ga_order_id'];
+        $externalOrderId = $requestParams['ga_order_id'];
 
-        if (is_null($order_id) || $order_id < 1) {
+        if (is_null($externalOrderId) || $externalOrderId) {
             $requestParams['ga_order_id'] = 0;
             $this->_redirect('przelewy/przelewy/failure',$requestParams);
         } else {
-            $ga_order_id = $this->helper->getGaOrderId($order_id);
+            $ga_order_id = $this->helper->getGaOrderId($externalOrderId);
             $session->getQuote()->setIsActive(false)->save();
             $this->_redirect('checkout/onepage/success', array('ga_order_id' => $ga_order_id));
         }

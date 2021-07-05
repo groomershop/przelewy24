@@ -8,6 +8,16 @@ define(
         'use strict';
         return {
             validate: function () {
+                // Look for p24 element on payment page, no terms to accept if no element.
+                if(jQuery("#dialcom_przelewy").length < 1){
+                    return true;
+                }
+
+                // We do not accept if p24 isn't selected.
+                if(!jQuery("#dialcom_przelewy").is(':checked')){
+                    return true;
+                }
+
                 let przelewy = new PrzelewyComponent();
 
                 if (!przelewy.getTermsAccept()) {

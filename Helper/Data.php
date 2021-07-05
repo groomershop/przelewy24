@@ -134,7 +134,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function verifyTransaction($order_id)
     {
         $order_id = (int) $order_id;
-        $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+        $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($order_id);
         $payment = $order->getPayment();
         $storeId = $order->getStoreId();
         if ($payment) {
@@ -203,7 +203,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getGaOrderId($orderId)
     {
-        $orderId = (int) $orderId;
+        $orderId = (string) $orderId;
         $order = $this->objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
         $storeId = $order->getStoreId();
         $payinshop = (int)$this->scopeConfig->getValue(Data::XML_PATH_PAYINSHOP, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);

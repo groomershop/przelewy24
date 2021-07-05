@@ -43,10 +43,10 @@ class Redirect extends \Magento\Framework\App\Action\Action
         $session = $this->_objectManager->get('Magento\Checkout\Model\Session');
         $session->setPrzelewyQuoteId($session->getQuoteId());
 
-        $order_id = (int) $session->getLastRealOrderId();
-
-        if ($order_id) {
-            $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+        $orderId = $session->getLastRealOrderId();
+        //$orderId = $session->getLastOrderId();
+        if ($orderId) {
+            $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
             $paymentData = $order->getPayment()->getData();
             $additionalInformation = $paymentData['additional_information'];
             if(isset($additionalInformation['cc_id'])){
@@ -62,18 +62,17 @@ class Redirect extends \Magento\Framework\App\Action\Action
             if (isset($ccId) && (int)$ccId > 0) { // recurring
                 $this->_redirect('przelewy/przelewy/oneClick');
             } else {
-                $this->proceedRedirect($order_id, $additionalInformation);
+                $this->proceedRedirect($orderId, $additionalInformation);
             }
             $session->unsQuoteId();
         }
     }
 
-    private function proceedRedirect($order_id, $additionalInformation)
+    private function proceedRedirect($orderId, $additionalInformation)
     {
-        $order_id = (int) $order_id;
         $payment = $this->_objectManager->create('Dialcom\Przelewy\Model\Payment\Przelewy');
-        $payment->addExtracharge($order_id);
-        $order = $this->_objectManager->create('Magento\Sales\Model\Order')->load($order_id);
+        $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($orderId);
+        $payment->addExtracharge($order->getEntityId());
         $storeId = $order->getStoreId();
 
         $payinshop = (int)$this->scopeConfig->getValue(Data::XML_PATH_PAYINSHOP, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
@@ -90,7 +89,7 @@ class Redirect extends \Magento\Framework\App\Action\Action
                 $this->_view->renderLayout();
             } else {
                 $this->getResponse()->setBody(
-                    $this->_view->getLayout()->createBlock('Dialcom\Przelewy\Block\Payment\Przelewy\Redirect')->getHtml($order_id)
+                    $this->_view->getLayout()->createBlock('Dialcom\Przelewy\Block\Payment\Przelewy\Redirect')->getHtml($orderId)
                 );
             }
         }

@@ -89,7 +89,7 @@ class PaymentEmail extends \Magento\Backend\App\Action
         $base_url = $storeManager->getStore($storeId)->getBaseUrl();
 
         /*StoreId jest pobierane bezposrednio z zamówienia dzięki czemu możemy skojazyć w jakim języku zamówienie zostało złożone */
-        $right_key = md5($storeId . '|' . $order->getIncrementId());
+        $right_key = md5($storeId . '|' . $order->getEntityId());
 
         $payment_link = $base_url.'przelewy/przelewy/summary/order_id/' . $order->getIncrementId() . '/key/' . $right_key;
         $customerName = $order->getBillingAddress()->getData('firstname') . ' ' . $order->getBillingAddress()->getData('lastname');

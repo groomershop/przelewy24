@@ -73,7 +73,7 @@ class PaymentLink extends \Magento\Framework\App\Action\Action
         $storeId = $this->storeManager->getStore()->getId();
         $fullConfig = Waluty::getFullConfig($order->getOrderCurrencyCode(), $this->scopeConfig, $storeId);
 
-        $right_key = md5($fullConfig['merchant_id'] . '|' . $order->getIncrementId());
+        $right_key = md5($fullConfig['merchant_id'] . '|' . $order->getEntityId());
 
         $order->payment_link = $this->_url->getUrl('przelewy/przelewy/summary', array('order_id' => $order->getIncrementId(), 'key' => $right_key));
         $vars = array('order' => $order);

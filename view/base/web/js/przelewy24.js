@@ -160,14 +160,15 @@ require(['jquery', 'mage/translate'], function ($, mage) {
                     ''
                 );
             });
-            $('#paymethod_promote_list')
-                .sortable({
-                    stop: function () {
-                        updatePaymethodPromoted();
-                    }, axis: 'y',
-                })
-                .disableSelection()
-            ;
+            require(['jquery', 'jquery/ui'], function ($) {
+                $('#paymethod_promote_list')
+                    .sortable({
+                        stop: function () {
+                            updatePaymethodPromoted();
+                        }, axis: 'y',
+                    })
+                    .disableSelection()
+            });
             $('.paylistprom').change(function () {
                 updatePaymethodPromoted();
             });
@@ -211,22 +212,23 @@ require(['jquery', 'mage/translate'], function ($, mage) {
             }
             updatePaymethods();
 
-            $(".sortable.selected,.sortable.available").sortable({
-                connectWith: ".sortable.selected,.sortable.available",
-                placeholder: "bank-box bank-placeholder",
-                stop: function () {
-                    updatePaymethods();
-                },
-                revert: true,
-                start: function (e, ui) {
-                    window.setTimeout(function () {
-                        $('.bank-box.ui-sortable-helper').on('mouseup', function () {
-                            $(this).addClass('ui-helper-unrotate');
-                        });
-                    }, 100);
-                },
-            }).disableSelection();
-
+            require(['jquery', 'jquery/ui'], function ($) {
+                $(".sortable.selected,.sortable.available").sortable({
+                    connectWith: ".sortable.selected,.sortable.available",
+                    placeholder: "bank-box bank-placeholder",
+                    stop: function () {
+                        updatePaymethods();
+                    },
+                    revert: true,
+                    start: function (e, ui) {
+                        window.setTimeout(function () {
+                            $('.bank-box.ui-sortable-helper').on('mouseup', function () {
+                                $(this).addClass('ui-helper-unrotate');
+                            });
+                        }, 100);
+                    },
+                }).disableSelection();
+            });
         }
 
         if ($('fieldset#przelewy_settings_multicurr').length) {

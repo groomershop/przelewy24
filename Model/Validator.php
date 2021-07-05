@@ -76,6 +76,6 @@ class Validator extends \Magento\Framework\App\Config\Value
                 }
             }
         }
-        parent::beforeSave();
+        return parent::beforeSave();
     }
 }

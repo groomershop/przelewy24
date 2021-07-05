@@ -39,7 +39,7 @@ class CacheClearObserver implements ObserverInterface
     public function execute(Observer $observer)
     {
         $changed = $observer->getDataByKey(self::EVENT_DATA_KEY_CHANGED_PATHS);
-        if (in_array(self::P24_SETTINGS_INSTALLMENT, $changed)) {
+        if ($changed && in_array(self::P24_SETTINGS_INSTALLMENT, $changed)) {
             $this->cacheTypeList->cleanType(self::CACHE_PAGE_CACHE);
         }
     }

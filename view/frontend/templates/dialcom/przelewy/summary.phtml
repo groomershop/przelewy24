@@ -96,11 +96,15 @@ $_order_items = $_order->getItemsCollection()
 
 <?php
 if ($_order && $_order->getBaseTotalDue() > 0) { // jeśli jest coś jeszcze do zapłacenia to pokaż przyciski
-    $incrementid = $_order->getIncrementId();
+    /**
+     * @var string $calculatedOrderId
+     * @see Przelewy::getRedirectionFormData comment for order id type reference
+     */
+    $calculatedOrderId = $_order->getIncrementId();
     $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
     $form = $helper->getFormFactory();
     $form->setAction($przelewy->getPaymentURI($_order->getOrderCurrencyCode()))->setId('przelewy_przelewy_checkout')->setName('przelewy_przelewy_checkout')->setMethod('POST')->setUseContainer(true);
-    foreach ($przelewy->getRedirectionFormData($incrementid) as $field => $value) {
+    foreach ($przelewy->getRedirectionFormData($calculatedOrderId) as $field => $value) {
         if (!in_array($field, array('p24_method'))) {
             $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
         }

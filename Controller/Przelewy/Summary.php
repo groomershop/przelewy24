@@ -33,12 +33,12 @@ class Summary extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         $key = $this->getRequest()->getParam('key');
-        $order_id = (int)$this->getRequest()->getParam('order_id');
+        $order_id = (string) $this->getRequest()->getParam('order_id');
         $_order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
         $store_id = $_order->getStoreId();
         $fullConfig = Waluty::getFullConfig($_order->getOrderCurrencyCode(), $this->scopeConfig, $store_id);
 
-        $right_key = md5($store_id . '|' . $_order->getIncrementId());
+        $right_key = md5($store_id . '|' . $_order->getEntityId());
 
         if (!$_order || $_order->getBaseTotalDue() == 0 || $key !== $right_key) {
             $this->_redirect('customer/account');

@@ -1,5 +1,15 @@
 # Change Log #
 
+## [1.1.33] 15-03-2021
+- fix missing last method bug
+
+## [1.1.32] 15-03-2021
+- fix validation
+
+## [1.1.31] 15-01-2021
+- change recurring cards to REST API
+- fix compatibility with Magento 2.4
+
 ## [1.1.30] 03-06-2020
 
 - fix of extra charge issue when adding order in admin panel

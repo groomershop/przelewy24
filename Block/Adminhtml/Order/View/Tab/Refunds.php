@@ -203,7 +203,6 @@ class Refunds extends \Magento\Backend\Block\Template implements \Magento\Backen
      */
     public function refundProcess($orderId, $amountToRefund)
     {
-        $orderId = (int) $orderId;
         $this->setOrder($orderId);
         $storeId = $this->order->getStoreId();
         $this->merchantId = $this->scopeConfig->getValue(Data::XML_PATH_MERCHANT_ID, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);

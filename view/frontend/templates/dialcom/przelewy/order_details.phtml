@@ -5,14 +5,14 @@ use Dialcom\Przelewy\Przelewy24Class;
 
 $objectManager = ObjectManager::getInstance();
 $helper = $this->helper('Dialcom\Przelewy\Helper\Data');
-$order_id = (int)$this->getRequest()->getParam('order_id');
+$order_id = $this->getRequest()->getParam('order_id');
 $order = $objectManager->create('Magento\Sales\Model\Order')->load($order_id);
 if ($order && $order->getBaseTotalDue() > 0 && in_array($order->getStatus(), ['pending', Przelewy24Class::PENDING_PAYMENT_CUSTOM_STATUS])) {
-    $incrementid = $order->getIncrementId();
+    $calculatedOrderId = $order->getIncrementId();
     $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
     $form = $helper->getFormFactory();
     $form->setAction($przelewy->getPaymentURI($order->getOrderCurrencyCode()))->setId('przelewy_przelewy_checkout')->setName('przelewy_przelewy_checkout')->setMethod('POST')->setUseContainer(true);
-    foreach ($przelewy->getRedirectionFormData($incrementid) as $field => $value) {
+    foreach ($przelewy->getRedirectionFormData($calculatedOrderId) as $field => $value) {
         if (!in_array($field, array('p24_method'))) {
             $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
         }

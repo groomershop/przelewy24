@@ -19,7 +19,7 @@ class Payment extends \Magento\Framework\App\Action\Action
         return;
         //TODO - not working - this is ga_before_payment feature
 
-        $order_id = (int) $this->_objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
+        $order_id = $this->_objectManager->get('Magento\Checkout\Model\Session')->getLastRealOrderId();
 
         if ($order_id) {
             $this->getResponse()->setBody(
