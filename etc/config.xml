@@ -23,8 +23,8 @@
                 <paymethod_first>25,31,112,20,65</paymethod_first>
             </paymethods>
             <P24NOW>
-                <promote_in_payment>1</promote_in_payment>
-                <promote_in_payment_methods>1</promote_in_payment_methods>
+                <promote_in_payment>0</promote_in_payment>
+                <promote_in_payment_methods>0</promote_in_payment_methods>
             </P24NOW>
             <paysettings>
                 <usegraphical>1</usegraphical>
