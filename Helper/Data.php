@@ -8,6 +8,9 @@ use Dialcom\Przelewy\Model\Config\Waluty;
 
 class Data extends \Magento\Framework\App\Helper\AbstractHelper
 {
+    const P24NOW_METHOD_ID = 266;
+    const P24NOW_CHANNEL_ID = 2048;
+
     const XML_PATH_TITLE = 'payment/dialcom_przelewy/title';
     const XML_PATH_TEXT = 'payment/dialcom_przelewy/text';
     const XML_PATH_MERCHANT_ID = 'payment/dialcom_przelewy/merchant_id';
@@ -24,6 +27,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_PAYMETHOD_FIRST = 'przelewy_settings/paymethods/paymethod_first';
     const XML_PATH_PAYMETHOD_SECOND = 'przelewy_settings/paymethods/paymethod_second';
     const XML_PATH_PAYMETHOD_ALL = 'przelewy_settings/paymethods/paymethods_all';
+    const XML_PATH_PROMOTE_P24NOW_PAYMENT = 'przelewy_settings/P24NOW/promote_in_payment';
+    const XML_PATH_PROMOTED_P24NOW_TILE_WIDTH = 'przelewy_settings/P24NOW/promoted_tile_width';
+    const XML_PATH_PROMOTE_P24NOW_IN_PAYMENT_METHODS = 'przelewy_settings/P24NOW/promote_in_payment_methods';
     const XML_PATH_SHOW_PROMOTED = 'przelewy_settings/promoted/show_promoted';
     const XML_PATH_PAYMETHOD_PROMOTED = 'przelewy_settings/promoted/paymethod_promoted';
     const XML_PATH_USEGRAPHICAL = 'przelewy_settings/paysettings/usegraphical';
@@ -36,6 +42,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_CHG_STATE = 'przelewy_settings/paysettings/chg_state';
     const XML_PATH_MK_INVOICE = 'przelewy_settings/paysettings/mk_invoice';
     const XML_PATH_WAIT_FOR_RESULT = 'przelewy_settings/paysettings/wait_for_result';
+    const XML_PATH_SAP_COMPATIBILITY = 'przelewy_settings/additionall/sap_compatibility';
     const XML_PATH_EXTRACHARGE = 'przelewy_settings/additionall/extracharge';
     const XML_PATH_EXTRACHARGE_PRODUCT = 'przelewy_settings/additionall/extracharge_product';
     const XML_PATH_EXTRACHARGE_AMOUNT = 'przelewy_settings/additionall/extracharge_amount';
@@ -151,7 +158,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $currency = $order->getOrderCurrencyCode();
 
-        $ret = $P24->trnVerifyEx(array('p24_amount' => number_format($order->getGrandTotal() * 100, 0, "", ""), 'p24_currency' => $currency));
+        $ret = $P24->trnVerifyEx([
+            'p24_amount' => number_format($order->getGrandTotal() * 100, 0, '', ''),
+            'p24_currency' => $currency
+        ]);
 
         if ($ret !== null) {
             $sendOrderUpdateEmail = false;
@@ -164,19 +174,23 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     if ($order->getState() != \Magento\Sales\Model\Order::STATE_PROCESSING) {
                         $sendOrderUpdateEmail = true;
                     }
+
                     $order->addStatusToHistory(\Magento\Sales\Model\Order::STATE_PROCESSING, __('The payment has been accepted.'), true);
                     $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING, true);
                     $order->save();
+
                     if ($mkInvoice == 1) {
                         $this->makeInvoiceFromOrder($order);
                     } else {
                         $order->setTotalPaid($order->getGrandTotal());
                     }
                 }
+
                 $order->save();
 
                 // zapis karty
                 $requestedMethod = $this->_getRequest()->getPost('p24_method');
+
                 if (in_array((int)$requestedMethod, Recurring::getChannelsCards())) {
                     $recurring = $this->objectManager->create('Dialcom\Przelewy\Model\Recurring');
                     $recurring->saveUsedCard($order->getData('customer_id'), (int)$this->_getRequest()->getPost('p24_order_id'), $storeId);
@@ -186,13 +200,17 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $sendOrderUpdateEmail = true;
                 }
 
-                $order->addStatusToHistory(\Magento\Sales\Model\Order::STATE_HOLDED, __('Payment error.') . ' ' . $ret['errorMessage'], true);
+                $error = $P24->getLastError();
+                $errorMessage = !is_null($error) && isset($error['errorMessage']) ? $error['errorMessage'] : 'Invalid CRC';
+
+                $order->addStatusToHistory(\Magento\Sales\Model\Order::STATE_HOLDED, __('Payment error.') . ' ' . $errorMessage, true);
                 $order->setState(\Magento\Sales\Model\Order::STATE_HOLDED, true);
             }
 
             if ($sendOrderUpdateEmail == true) {
                 $order->setSendEmail(true);
             }
+
             $order->save();
 
             return $ret === true;

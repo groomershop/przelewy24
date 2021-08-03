@@ -256,6 +256,43 @@ require(['jquery', 'mage/translate'], function ($, mage) {
             }
         }
 
+        const canPromoteP24NOW = getBanksList().filter(element => {
+            return parseInt(element.id) === 266;
+        }).length !== 0;
+
+        if (canPromoteP24NOW) {
+            const inputP24NOW = document.querySelector('input#paylistprom_266');
+            const promoteP24NOWInPaymentMethodsSelect = document.querySelector('select#przelewy_settings_P24NOW_promote_in_payment_methods');
+            const promoteP24NOWInPaymentsSelect = document.querySelector('select#przelewy_settings_P24NOW_promote_in_payment');
+
+            if (promoteP24NOWInPaymentMethodsSelect && inputP24NOW) {
+
+                promoteP24NOWInPaymentMethodsSelect.addEventListener('change', e => {
+                    const state = promoteP24NOWInPaymentMethodsSelect.value === '1';
+
+                    if (state !== inputP24NOW.checked) {
+                        inputP24NOW.checked = state;
+                        updatePaymethodPromoted();
+                    }
+                });
+
+                inputP24NOW.addEventListener('change', e => {
+                    const state = inputP24NOW.checked;
+                    const selectState = promoteP24NOWInPaymentMethodsSelect.value === '1';
+
+                    if (state !== selectState) {
+                        promoteP24NOWInPaymentMethodsSelect.value = state ? '1' : '0';
+                    }
+                });
+            }
+        } else {
+            const promoteP24NOWSection = document.querySelector('#przelewy_settings_P24NOW-head');
+
+            if (promoteP24NOWSection) {
+                promoteP24NOWSection.closest('.section-config').remove();
+            }
+        }
+
         if(window.location.pathname.indexOf("checkout/onepage/success/ga_order_id") > 0){
             $('.checkout-success > p:nth-child(1)').toggle();
             var split = window.location.pathname.split('/');

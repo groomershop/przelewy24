@@ -1,5 +1,11 @@
 # Change Log #
 
+## [1.1.35] 05-07-2021
+- Added P24NOW promotion options
+
+## [1.1.34] 15-03-2021
+- Added compatibility option for SAP integration
+
 ## [1.1.33] 15-03-2021
 - fix missing last method bug
 

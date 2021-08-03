@@ -93,6 +93,7 @@
 "After leaving the bank website, wait for the P24 transaction result?","Chcete po opuštění stránek banky setrvat na stránkách P24 a počkat na výsledek transakce. Hodnota 'Ne' přepíná zákazníka okamžitě do obchodu."
 "Additional settings","Další nastavení"
 "Enable extra charge","Započítat dodatečné poplatky"
+"Turn on SAP compatibility (only for SAP integrated systems)","Soulad se SAP"
 "Choose product","Zvolte produkt"
 "This virtual product will be added to the invoice with amount:","Tento virtuální produkt bude přidán na fakturu za cenu brutto v následující výši:"
 "Increase payment (amount)","Navýšit platbu o pevnou částku"
