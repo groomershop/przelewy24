@@ -2,7 +2,6 @@
 
 namespace Dialcom\Przelewy\Model\Payment;
 
-use Dialcom\Przelewy\Helper\Data;
 use Dialcom\Przelewy\Model\Config\Channels;
 use Dialcom\Przelewy\Model\Config\Installment;
 use Dialcom\Przelewy\Model\Recurring;
@@ -70,7 +69,7 @@ class PrzelewyConfigProvider implements \Magento\Checkout\Model\ConfigProviderIn
         );
 
         $this->lastPaymentMethod = $this->method->getBlock()->getLastPaymentMethod();
-        $this->cards = $this->method->getOneClick() ? $this->method->getBlock()->getCards() : [];
+        $this->cards = $this->method->getOneClick() ? $this->method->getBlock()->getCards() : array();
         $this->payMethodPromoted = explode(',', $this->method->getPayMethodPromoted());
     }
 
@@ -82,7 +81,7 @@ class PrzelewyConfigProvider implements \Magento\Checkout\Model\ConfigProviderIn
      */
     private static function removeMethod142and145(array $paymentList, array $methodArray) {
         if (array_key_exists(218, $paymentList)) {
-            return array_values(array_diff($methodArray, [142, 145]));
+            return array_values(array_diff($methodArray, array(142, 145)));
         }
 
         return $methodArray;
@@ -220,34 +219,15 @@ HTML;
     protected function getMethodsList()
     {
         $result = '';
-
         if ($this->method->getShowPayMethods()) {
-            $result = $this->method->getUseGraphical() ? $this->getGraphicalMethodsList() : $this->getTextMethodsList();
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param array $paymentList
-     * @return array
-     */
-    private function filterPaymentList($paymentList)
-    {
-        foreach ($paymentList as $methodId => $methodName) {
-            switch ($methodId) {
-                case Data::P24NOW_METHOD_ID:
-                    if (!$this->canSelectP24NOW()) {
-                        unset($paymentList[$methodId]);
-                    }
-
-                    break;
-                default:
-                    break;
+            if ($this->method->getUseGraphical()) {
+                $result = $this->getGraphicalMethodsList();
+            } else {
+                $result = $this->getTextMethodsList();
             }
         }
 
-        return $paymentList;
+        return $result;
     }
 
     private function getGraphicalMethodsList()
@@ -256,12 +236,9 @@ HTML;
         $bankHtml = '';
         $bankHtmlMore = '';
         $unfold = '';
-        $payment_list = $this->filterPaymentList($this->originalPaymentList);
+        $payment_list = $this->originalPaymentList;
 
-        $canSelectP24NOW = $this->canSelectP24NOW();
-        $enabledPromoteP24 = $this->method->isEnabledPromoteP24NOWPayment() && $canSelectP24NOW;
-
-        if ($this->lastPaymentMethod && ($this->lastPaymentMethod != Data::P24NOW_METHOD_ID || ($this->lastPaymentMethod == Data::P24NOW_METHOD_ID && (!$enabledPromoteP24 && $canSelectP24NOW)))) {
+        if ($this->lastPaymentMethod) {
             $bankHtml .= $this->method->getBlock()->getBankHtml($this->lastPaymentMethod, __('Recently used'));
             $makeUnfold = true;
         }
@@ -276,42 +253,16 @@ HTML;
 
         if (sizeof($this->payMethodFirst) == 0 || (sizeof($this->payMethodFirst) == 1 && empty($this->payMethodFirst[0]))) {
             $this->payMethodFirst = $this->payMethodSecond;
-            $this->payMethodSecond = [];
+            $this->payMethodSecond = array();
             $makeUnfold = false;
         }
 
-        if ($enabledPromoteP24) {
-            if (($P24NOWPaymentOffset = array_search(Data::P24NOW_METHOD_ID, $this->payMethodFirst)) !== false) {
-                unset($this->payMethodFirst[$P24NOWPaymentOffset]);
-            }
-
-            if (($P24NOWPaymentOffset = array_search(Data::P24NOW_METHOD_ID, $this->payMethodSecond)) !== false) {
-                unset($this->payMethodSecond[$P24NOWPaymentOffset]);
-            }
-
-            $tileWidth = 2; // $this->method->getPromotedP24NOWTileWidth();
-            $additionalPaymentsCount = 5 - $tileWidth;
-            $additionalPayments = array_splice($this->payMethodFirst, 0, $additionalPaymentsCount);
-
-            if ($this->payMethodFirst !== $this->payMethodSecond) {
-                $this->payMethodSecond = array_merge(array_diff($this->payMethodFirst, $additionalPayments), $this->payMethodSecond);
-            }
-
-            $this->payMethodFirst = array_merge([Data::P24NOW_METHOD_ID], $additionalPayments);
-        }
-
         foreach ($this->payMethodFirst as $bank_id) {
-            if (isset($payment_list[$bank_id]) && (($enabledPromoteP24 && $bank_id === Data::P24NOW_METHOD_ID) || $bank_id !== $this->lastPaymentMethod)) {
-                if ($enabledPromoteP24 && $bank_id === Data::P24NOW_METHOD_ID) {
-                    $tileWidth = $this->method->getPromotedP24NOWTileWidth();
-                    $bankHtml .= $this->method->getBlock()->getBankHtml($bank_id, $payment_list[$bank_id], '', '', 'promoted-'.$tileWidth);
-
-                    continue;
-                }
-
+            if (isset($payment_list[$bank_id]) && $bank_id != $this->lastPaymentMethod) {
                 $bankHtml .= $this->method->getBlock()->getBankHtml($bank_id, $payment_list[$bank_id]);
             }
         }
+
 
         foreach ($this->payMethodSecond as $bank_id) {
             if (isset($payment_list[$bank_id]) && !in_array($bank_id, $this->payMethodFirst) && $bank_id != $this->lastPaymentMethod) {
@@ -366,7 +317,7 @@ HTML;
         $bankText = '';
         $bankTextMore = '';
         $unfold = '';
-        $payment_list = $this->filterPaymentList($this->originalPaymentList);
+        $payment_list = $this->originalPaymentList;
 
         if ($this->lastPaymentMethod) {
             $lastPayment = isset($payment_list[$this->lastPaymentMethod]) ? $payment_list[$this->lastPaymentMethod] : '';
@@ -455,9 +406,9 @@ HTML;
 
     protected function getPaymentMethodAsGateway()
     {
-        $display_promoted = [];
+        $display_promoted = array();
 
-        // raty na liście bramek
+// raty na liście bramek
         if ((int)$this->method->getInstallment() > Installment::SHOW_NOT && $this->totalCart >= Przelewy::getMinRatyAmount() && is_array($this->channelsInstallment)) {
             foreach ($this->channelsInstallment as $channelInstallment) {
                 if (isset($this->paymentList[$channelInstallment]) && !in_array($channelInstallment, $display_promoted)) {
@@ -466,7 +417,7 @@ HTML;
             }
         }
 
-        // formy płatności na liście bramek
+// formy płatności na liście bramek
         $promoted_items = $this->payMethodPromoted;
         if ($this->method->getShowPromoted() == '1' && sizeof($promoted_items) > 0 && !(sizeof($promoted_items) == 1 && empty($promoted_items[0]))) {
             foreach ($promoted_items as $p24channelId) {
@@ -492,83 +443,38 @@ HTML;
         return $result;
     }
 
-
-    /**
-     * @param $displayPromoted
-     * @return string
-     */
-    private function getPromotedHtml($displayPromoted)
+    private function getPromotedHtml($display_promoted)
     {
-        $canSelectP24NOW = $this->canSelectP24NOW();
-        $isPromotedP24NOW = $canSelectP24NOW && $this->method->isEnabledPromoteP24NOWInPaymentMethods();
-        $result = $isPromotedP24NOW ? $this->createFakePaymentMethodHtml(Data::P24NOW_METHOD_ID, true) : '';
-        $canAddJs = $isPromotedP24NOW;
+        $result = '';
+        $addJS = false;
+        // wyświetl formy płatności na liście bramek, jeśli są
+        foreach ($display_promoted as $p24channelId) {
+            $exploded = explode('|', $p24channelId);
+            $recurring = count($exploded) === 2;
+            $code = 'dialcom_przelewy_' . $p24channelId;
+            $label = $this->paymentList[$p24channelId];
+            $imgUrl = filter_var($recurring ? $this->method->getBlock()->getCardImgUrl() : 'https://secure.przelewy24.pl/template/201312/bank/logo_' . $p24channelId . '.gif', FILTER_SANITIZE_URL);
+            $placeOrderText = __('Place Order');
+            $postfix = $recurring ? '_' . str_replace('|', '_', $p24channelId) : '_' . $p24channelId;
+            $oneClickInfo = $recurring || in_array($p24channelId, Recurring::getChannelsCards()) ? $this->getOneClickInfo($postfix) : '';
 
-        if ($isPromotedP24NOW) {
-            $displayPromoted = array_filter($displayPromoted, function ($value) {
-                return $value !== Data::P24NOW_METHOD_ID;
-            });
-        }
-
-        foreach ($displayPromoted as $promotedMethod) {
-            if ($promotedMethod === Data::P24NOW_METHOD_ID && !$canSelectP24NOW) {
-                continue;
-            }
-
-            $result .= $this->createFakePaymentMethodHtml($promotedMethod);
-            $canAddJs = true;
-        }
-
-        return $result.($canAddJs ? $this->getPromotedJS() : '');
-    }
-
-    /**
-     * @return bool
-     */
-    private function canSelectP24NOW()
-    {
-        $cart = $this->objectManager->get('\Magento\Checkout\Model\Cart');
-        $grandTotal = $cart->getQuote()->getGrandTotal();
-        $currency = $this->storeManager->getStore()->getCurrentCurrency()->getCode();
-
-        return $grandTotal >= 0 && $grandTotal <= 10000 && $currency === 'PLN';
-    }
-
-    /**
-     * @param $methodId
-     * @param bool $zoomed
-     * @return string
-     */
-    private function createFakePaymentMethodHtml($methodId, $zoomed = false)
-    {
-        $exploded = explode('|', $methodId);
-        $recurring = count($exploded) === 2;
-        $code = "dialcom_przelewy_{$methodId}";
-        $label = $this->paymentList[$methodId];
-        $imgUrl = filter_var($recurring ? $this->method->getBlock()->getCardImgUrl() : "https://secure.przelewy24.pl/template/201312/bank/logo_{$methodId}.gif", FILTER_SANITIZE_URL);
-        $placeOrderText = __('Place Order');
-        $postfix = $recurring ? '_' . str_replace('|', '_', $methodId) : '_' . $methodId;
-        $oneClickInfo = $recurring || in_array($methodId, Recurring::getChannelsCards()) ? $this->getOneClickInfo($postfix) : '';
-        $zoomed = $zoomed ? ' style="height: 55px"' : '';
-
-        return <<<HTML
+            $result .= <<<HTML
                 <div class="payment-method">
                     <div class="payment-method-title field choice">
                         <input type="radio"
                                name="payment[method]"
                                class="radio"
                                autocomplete="off"
-                               data-value="dialcom_przelewy_method_{$methodId}"
+                               data-value="dialcom_przelewy_method_{$p24channelId}"
                                data-fake="dialcom_przelewy"
-                               data-method="{$methodId}"
+                               data-method="{$p24channelId}"
                                id="{$code}"
                                value="{$code}" />
                         <label for="{$code}" class="label">
-                            <img src="{$imgUrl}" {$zoomed} class="payment-icon"/>
+                            <img src="{$imgUrl}" class="payment-icon"/>
                             <span>{$label}</span>
                         </label>
                     </div>
-
                     <div class="payment-method-content">
                         <p style="padding-left:15px;font-size:small;font-style: italic;"></p>
                         <span>{$oneClickInfo}</span>
@@ -587,6 +493,14 @@ HTML;
                     </div>
                 </div>
 HTML;
+            $addJS = true;
+        }
+
+        if ($addJS) {
+            $result .= $this->getPromotedJS();
+        }
+
+        return $result;
     }
 
     private function getPromotedJS()
@@ -636,31 +550,6 @@ HTML;
                             function getFakeBankName(id) {
                                return JSON.parse($('#p24bankNames').val())[parseInt(id)];
                             }
-                        }
-                    });
-
-                    $(document).ready(function() {
-                        const agreementSection = document.querySelector('.payment-method .payment-method-content .checkout-agreements-block');
-
-                        if (agreementSection) {
-                            document.querySelectorAll('.payment-method').forEach((element) => {
-                                if (element.querySelector('input[data-fake="dialcom_przelewy"]')) {
-                                    let firstTrigger = false;
-
-                                    element.addEventListener('click', e => {
-                                        if (!firstTrigger) {
-                                            let clonedAgreementSection = agreementSection.cloneNode(true);
-                                            element.querySelector('.payment-method-content').prepend(clonedAgreementSection);
-
-                                            clonedAgreementSection.querySelector('button').addEventListener('click', e => {
-                                                $(agreementSection.querySelector('button')).trigger('click');
-                                            });
-                                        }
-
-                                        firstTrigger = true;
-                                    });
-                                }
-                            });
                         }
                     });
                 });

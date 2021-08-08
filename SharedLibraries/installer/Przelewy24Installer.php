@@ -5,36 +5,44 @@ if (!class_exists('Przelewy24Installer', false)) {
     {
         private $translations;
         private $sliderEnabled = true;
-        private $pages = [];
+        private $pages = array();
 
-        public function __construct($sliderEnabled = true, array $translations = [])
+        public function __construct($sliderEnabled = true, array $translations = array())
         {
             $this->sliderEnabled = $sliderEnabled;
             $this->setTranslations($translations);
         }
 
-        public function setTranslations(array $translations = [])
+        public function setTranslations(array $translations = array())
         {
             $this->translations = $translations;
-            // set default values
-            $defaultTranslations = [
-                'php_version' => 'Wersja PHP min. 5.5',
-                'curl_enabled' => 'Włączone rozszerzenie PHP cURL (php_curl.dll)',
-                'soap_enabled' => 'Włączone rozszerzenie PHP SOAP (php_soap.dll)',
-                'merchant_id' => 'ID sprzedawcy',
-                'shop_id' => 'ID sklepu',
-                'crc_key' => 'Klucz CRC',
-                'api_key' => 'Klucz API'
-            ];
 
-            foreach ($defaultTranslations as $translationKey => $translationValue) {
-                if (empty($this->translations[$translationKey])) {
-                    $this->translations[$translationKey] = $translationValue;
-                }
+            // set default values
+            if (empty($this->translations['php_version'])) {
+                $this->translations['php_version'] = 'Wersja PHP min. 5.2';
+            }
+            if (empty($this->translations['curl_version'])) {
+                $this->translations['curl_enabled'] = 'Włączone rozszerzenie PHP cURL (php_curl.dll)';
+            }
+            if (empty($this->translations['soap_enabled'])) {
+                $this->translations['soap_enabled'] = 'Włączone rozszerzenie PHP SOAP (php_soap.dll)';
+            }
+
+            if (empty($this->translations['merchant_id'])) {
+                $this->translations['merchant_id'] = 'ID sprzedawcy';
+            }
+            if (empty($this->translations['shop_id'])) {
+                $this->translations['shop_id'] = 'ID sklepu';
+            }
+            if (empty($this->translations['crc_key'])) {
+                $this->translations['crc_key'] = 'Klucz CRC';
+            }
+            if (empty($this->translations['api_key'])) {
+                $this->translations['api_key'] = 'Klucz API';
             }
         }
 
-        public function addPages(array $pages = [])
+        public function addPages(array $pages = array())
         {
             $this->pages = array_values($pages);
         }
@@ -46,15 +54,14 @@ if (!class_exists('Przelewy24Installer', false)) {
             }
 
             $requirements = $this->checkRequirements();
-            $params = [
+            $params = array(
                 'requirements' => $requirements,
                 'translations' => $this->translations
-            ];
+            );
             $maxSteps = 0;
-            $data = [
-                'steps' => []
-            ];
-
+            $data = array(
+                'steps' => array()
+            );
             foreach ($this->pages as $page) {
                 $page = (int)$page;
                 if ($page > 0) {
@@ -67,7 +74,6 @@ if (!class_exists('Przelewy24Installer', false)) {
             if ($maxSteps === 0) {
                 return '';
             }
-
             $data['maxSteps'] = $maxSteps;
 
             return $this->loadTemplate('installer', $data);
@@ -87,7 +93,7 @@ if (!class_exists('Przelewy24Installer', false)) {
 
         private function loadTemplate($view, $data = null)
         {
-            extract(['content' => $data]);
+            extract(array("content" => $data));
             ob_start();
             $viewFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'theme' . DIRECTORY_SEPARATOR . "$view.tpl.php";
 
@@ -96,28 +102,26 @@ if (!class_exists('Przelewy24Installer', false)) {
             } else {
                 throw new Exception('View not exist in ' . get_class($this));
             }
-
             $content = ob_get_clean();
             return $content;
         }
 
         private function checkRequirements()
         {
-            $data = [
-                'php' => [
-                    'test' => (version_compare(PHP_VERSION, '5.5.0') > 0),
+            $data = array(
+                'php' => array(
+                    'test' => (version_compare(PHP_VERSION, '5.2.0') > 0),
                     'label' => $this->translations['php_version']
-                ],
-                'curl' => [
+                ),
+                'curl' => array(
                     'test' => function_exists('curl_version'),
                     'label' => $this->translations['curl_enabled']
-                ],
-                'soap' => [
+                ),
+                'soap' => array(
                     'test' => class_exists('SoapClient'),
                     'label' => $this->translations['soap_enabled']
-                ]
-            ];
-
+                )
+            );
             return $data;
         }
     }

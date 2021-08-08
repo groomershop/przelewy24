@@ -8,7 +8,7 @@ use Dialcom\Przelewy\Przelewy24Class;
 use Dialcom\Przelewy\Services\PayloadForRestTransaction;
 use Magento\Sales\Model\Order;
 
-class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
+class  Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 {
     const PAYMENT_METHOD_PRZELEWY_CODE = 'dialcom_przelewy';
     protected $_code = self::PAYMENT_METHOD_PRZELEWY_CODE;
@@ -185,7 +185,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 
     public function getOrderPlaceRedirectUrl()
     {
-        return $this->urlBuilder->getUrl('przelewy/przelewy/redirect', ['noCache' => time() . uniqid(true)]);
+        return $this->urlBuilder->getUrl('przelewy/przelewy/redirect', array('noCache' => time() . uniqid(true)));
     }
 
     public function getCheckout()
@@ -236,7 +236,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         $amount = number_format($order->getGrandTotal() * 100, 0, "", "");
         $currency = $order->getOrderCurrencyCode();
 
-        $data = [
+        $data = array(
             'p24_session_id' => $sessionId,
             'p24_merchant_id' => (int) $this->getMerchantId(),
             'p24_pos_id' => (int) $this->getShopId(),
@@ -252,32 +252,32 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
             'p24_country' => 'PL',
             'p24_encoding' => 'utf-8',
             'p24_url_status' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/status'),FILTER_SANITIZE_URL),
-            'p24_url_return' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/returnUrl', ['ga_order_id' => $calculatedOrderId]),FILTER_SANITIZE_URL),
+            'p24_url_return' => filter_var($this->urlBuilder->getUrl('przelewy/przelewy/returnUrl', array('ga_order_id' => $calculatedOrderId)),FILTER_SANITIZE_URL),
             'p24_api_version' => filter_var(P24_VERSION, FILTER_SANITIZE_URL),
             'p24_ecommerce' => 'magento2_' . $this->objectManager->get('Magento\Framework\App\ProductMetadata')->getVersion(),
             'p24_ecommerce2' => $this->objectManager->get('Magento\Framework\Module\ModuleList')->getOne('Dialcom_Przelewy')['setup_version'],
             'p24_wait_for_result' => $this->getWaitForResult() ? '1' : '0',
             'p24_shipping' => number_format($order->getShippingAmount() * 100, 0, "", ""),
-        ];
+        );
 
-        $productsInfo = [];
+        $productsInfo = array();
         foreach ($order->getAllVisibleItems() as $item) {
             $productId = $item->getProductId();
             $product = $this->objectManager->create('Magento\Catalog\Model\Product')->load($productId);
 
-            $productsInfo[] = [
+            $productsInfo[] = array(
                 'name' => filter_var($product->getName(), FILTER_SANITIZE_STRING),
                 'description' => $product->getDescription(),
                 'quantity' => (int)$item->getQtyOrdered(),
                 'price' => (int)number_format($item->getPrice() * 100, 0, "", ""),
                 'number' => $productId,
-            ];
+            );
         }
 
-        $translations = [
+        $translations = array(
             'virtual_product_name' => __('Extra charge [VAT and discounts]')->__toString(),
             'cart_as_product' => __('Your order')->__toString(),
-        ];
+        );
 
         $p24Product = new \Przelewy24Product($translations);
         $p24ProductItems = $p24Product->prepareCartItems($amount, $productsInfo, $data['p24_shipping']);
@@ -379,6 +379,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 
     public function getPayMethodFirst()
     {
+
         return $this->scopeConfig->getValue(Data::XML_PATH_PAYMETHOD_FIRST, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeId);
     }
 
@@ -400,31 +401,6 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
     public function getShowPayMethods()
     {
         return $this->scopeConfig->getValue(Data::XML_PATH_SHOWPAYMENTMETHODS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeId);
-    }
-
-    public function getPromoteP24NOWPayment()
-    {
-        return $this->scopeConfig->getValue(Data::XML_PATH_PROMOTE_P24NOW_PAYMENT, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeId);
-    }
-
-    public function isEnabledPromoteP24NOWPayment()
-    {
-        return $this->getPromoteP24NOWPayment() === '1';
-    }
-
-    public function getPromotedP24NOWTileWidth()
-    {
-        return $this->scopeConfig->getValue(Data::XML_PATH_PROMOTED_P24NOW_TILE_WIDTH, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeId);
-    }
-
-    public function getPromoteP24NOWInPaymentMethods()
-    {
-        return $this->scopeConfig->getValue(Data::XML_PATH_PROMOTE_P24NOW_IN_PAYMENT_METHODS, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $this->storeId);
-    }
-
-    public function isEnabledPromoteP24NOWInPaymentMethods()
-    {
-        return $this->getPromoteP24NOWInPaymentMethods() === '1';
     }
 
     public function getUseGraphical()
@@ -459,18 +435,18 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 
     public function getCountriesToOptionArray()
     {
-        $new = [];
+        $new = array();
         foreach ($this->_sa_countries as $key => $option) {
-            $new[] = [
+            $new[] = array(
                 'value' => $key,
                 'label' => $option
-            ];
+            );
         }
 
         return $new;
     }
 
-    private $_sa_countries = [
+    private $_sa_countries = array(
         'AL' => 'Albania',
         'AUS' => 'Australia',
         'A' => 'Austria',
@@ -515,7 +491,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
         'UA' => 'Ukraine',
         'UK' => 'United Kingdom',
         'USA' => 'United States',
-    ];
+    );
 
     /**
      * Zwraca kwotę dodatkowej opłaty przy wyborze przelewy24 na podstawie order_id.
@@ -558,7 +534,6 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
 
             $extracharge_amount = max($inc_amount, $inc_percent);
         }
-
         return $extracharge_amount;
     }
 
@@ -615,7 +590,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
                     // $quote->save();
                     $order->save();
                 } catch (\Exception $e) {
-                    $this->logger->debug([__METHOD__ . ' ' . $e->getMessage()]);
+                    $this->logger->debug(array(__METHOD__ . ' ' . $e->getMessage()));
                 }
             }
         }

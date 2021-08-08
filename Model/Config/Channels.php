@@ -8,6 +8,7 @@ use Dialcom\Przelewy\Przelewy24Class;
 
 class Channels
 {
+
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
@@ -22,8 +23,6 @@ class Channels
      * @var \Magento\Framework\App\ObjectManager
      */
     private $objectManager;
-
-    private $storeManager;
 
     /**
      * Channels constructor.
@@ -42,12 +41,12 @@ class Channels
 
     public static function getChannelsInstallment()
     {
-        return [72, 129, 136];
+        return array(72, 129, 136);
     }
 
     public static function getChannelsNonPln()
     {
-        return [66, 92, 124, 140, 145, 152, 173, 218];
+        return array(66, 92, 124, 140, 145, 152, 173, 218);
     }
 
     private static function getWsdlService($merchantId)
@@ -63,17 +62,12 @@ class Channels
     private static function soap_method_exists($soapClient, $method)
     {
         $list = $soapClient->__getFunctions();
-
         if (is_array($list)) {
             foreach ($list as $line) {
                 list($type, $name) = explode(' ', $line, 2);
-
-                if (strpos($name, $method) === 0) {
-                    return true;
-                }
+                if (strpos($name, $method) === 0) return true;
             }
         }
-
         return false;
     }
 
@@ -141,14 +135,12 @@ class Channels
         $scopeName = AdvancedValidator::getScopeNameFromUrl();
 
         $order_id = $this->objectManager->get('Magento\Checkout\Model\Session')->getLastOrderId();
-
         if ($order_id != 0) {
             $order = $this->objectManager->create('Magento\Sales\Model\Order')->load($order_id);
             $scopeId = $order->getStoreId();
         }
-
         $fullConfig = Waluty::getFullConfig($currency, $this->scopeConfig, $scopeId, $scopeName);
-        $payment_list = [];
+        $payment_list = array();
         $P24C = new Przelewy24Class(
             $fullConfig['merchant_id'],
             $fullConfig['shop_id'],
@@ -166,39 +158,22 @@ class Channels
         } catch (\Exception $e) {
             error_log(__METHOD__ . ' ' . $e->getMessage());
         }
-
         if (isset($res) && $res->error->errorCode === 0) {
             $thereIs218 = false;
-
             foreach ($res->result as $item) {
                 if (218 === (int)$item->id) {
                     $thereIs218 = true;
                 }
-
-                $payment_list[] = ['value' => $item->id, 'label' => $item->name];
+                $payment_list[] = array('value' => $item->id, 'label' => $item->name);
             }
-
             if ($thereIs218) {
                 $payment_list = array_filter($payment_list, function ($payment) {
-                    return !in_array($payment['value'], [142, 145]);
+                    return !in_array($payment['value'], array(142, 145));
                 });
             }
         }
 
-        if ($this->getCurrentCurrency() !== 'PLN') {
-            $payment_list = array_filter($payment_list, function ($payment) {
-                return (int)$payment['value'] !== Data::P24NOW_METHOD_ID;
-            });
-        }
 
         return $payment_list;
-    }
-
-    private function getCurrentCurrency()
-    {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager = $objectManager->create('\Magento\Store\Model\StoreManagerInterface');
-
-        return $storeManager->getStore()->getCurrentCurrency()->getCode();
     }
 }

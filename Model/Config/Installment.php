@@ -10,10 +10,10 @@ class Installment
 
     public function toOptionArray()
     {
-        return [
-            ['value' => self::SHOW_ALL, 'label' => __('Product page (information) and payment page (button)')],
-            ['value' => self::SHOW_GATEWAY_ONLY, 'label' => __('Only payment page (button)')],
-            ['value' => self::SHOW_NOT, 'label' => __('Do not show the installment')],
-        ];
+        return array(
+            array('value' => self::SHOW_ALL, 'label' => __('Product page (information) and payment page (button)')),
+            array('value' => self::SHOW_GATEWAY_ONLY, 'label' => __('Only payment page (button)')),
+            array('value' => self::SHOW_NOT, 'label' => __('Do not show the installment')),
+        );
     }
 }

@@ -67,11 +67,6 @@ class Przelewy extends \Magento\Payment\Block\Form
         parent::__construct($context, $data);
     }
 
-    public function getStoreCurrency()
-    {
-        return $this->storeManager->getStore()->getCurrentCurrency()->getCode();
-    }
-
 //    protected function _construct()
 //    {
 //        parent::_construct();
@@ -84,8 +79,7 @@ class Przelewy extends \Magento\Payment\Block\Form
             $customerData = $this->customerSession->getCustomer();
             return Recurring::getCards($customerData->getId());
         }
-
-        return [];
+        return array();
     }
 
     public function getDescription()
@@ -222,7 +216,7 @@ class Przelewy extends \Magento\Payment\Block\Form
 
     public function getMyCardsUrl($cardId)
     {
-        return $this->urlBuilder->getUrl('przelewy/przelewy/mycards', ['cardrm' => $cardId]);
+        return $this->urlBuilder->getUrl('przelewy/przelewy/mycards', array('cardrm' => $cardId));
     }
 
     public function getLogoUrl()
