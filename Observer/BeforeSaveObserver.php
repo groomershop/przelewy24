@@ -70,6 +70,10 @@ class BeforeSaveObserver implements ObserverInterface
         if (!(Order::STATE_NEW === $order->getState())) {
             return false;
         }
+        
+        if (Przelewy::PAYMENT_METHOD_PRZELEWY_CODE !== $order->getPayment()->getMethodInstance()->getCode()) {
+            return false;
+        }
 
         if (!$isSapCompatibility) {
 
