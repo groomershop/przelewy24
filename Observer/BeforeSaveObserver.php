@@ -4,6 +4,7 @@ namespace Dialcom\Przelewy\Observer;
 
 use Dialcom\Przelewy\Helper\Data;
 use Dialcom\Przelewy\Przelewy24Class;
+use Dialcom\Przelewy\Model\Payment\Przelewy;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
