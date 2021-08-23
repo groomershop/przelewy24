@@ -78,7 +78,7 @@ class BeforeSaveObserver implements ObserverInterface
 
         if (!$isSapCompatibility) {
 
-            return true;
+            return false;
         }
 
         if (!('canceled' === $order->getStatus())) {
