@@ -2,8 +2,8 @@
 
 namespace Dialcom\Przelewy\Controller\Adminhtml\Przelewy;
 
+use Dialcom\Przelewy\Controller\Przelewy\Summary;
 use Dialcom\Przelewy\Helper\Data;
-use Dialcom\Przelewy\Model\Config\Waluty;
 
 class PaymentEmail extends \Magento\Backend\App\Action
 {
@@ -83,15 +83,7 @@ class PaymentEmail extends \Magento\Backend\App\Action
     private function proceed($template, \Magento\Sales\Model\Order $order)
     {
         $storeId = $order->getStoreId();
-
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
-        $base_url = $storeManager->getStore($storeId)->getBaseUrl();
-
-        /*StoreId jest pobierane bezposrednio z zamówienia dzięki czemu możemy skojazyć w jakim języku zamówienie zostało złożone */
-        $right_key = md5($storeId . '|' . $order->getEntityId());
-
-        $payment_link = $base_url.'przelewy/przelewy/summary/order_id/' . $order->getIncrementId() . '/key/' . $right_key;
+        $payment_link = Summary::getLink($order);
         $customerName = $order->getBillingAddress()->getData('firstname') . ' ' . $order->getBillingAddress()->getData('lastname');
         $order->customer_name = $customerName;
         $order->payment_link = $payment_link;

@@ -1,22 +1,23 @@
 <?php
 
 use Magento\Framework\App\ObjectManager;
+use Dialcom\Przelewy\Controller\Przelewy\Summary;
 use Dialcom\Przelewy\Przelewy24Class;
 
 $objectManager = ObjectManager::getInstance();
-$helper = $this->helper('Dialcom\Przelewy\Helper\Data');
 $order_id = $this->getRequest()->getParam('order_id');
 $order = $objectManager->create('Magento\Sales\Model\Order')->load($order_id);
 if ($order && $order->getBaseTotalDue() > 0 && in_array($order->getStatus(), ['pending', Przelewy24Class::PENDING_PAYMENT_CUSTOM_STATUS])) {
-    $calculatedOrderId = $order->getIncrementId();
-    $przelewy = $objectManager->get('Dialcom\Przelewy\Model\Payment\Przelewy');
-    $form = $helper->getFormFactory();
-    $form->setAction($przelewy->getPaymentURI($order->getOrderCurrencyCode()))->setId('przelewy_przelewy_checkout')->setName('przelewy_przelewy_checkout')->setMethod('POST')->setUseContainer(true);
-    foreach ($przelewy->getRedirectionFormData($calculatedOrderId) as $field => $value) {
-        if (!in_array($field, array('p24_method'))) {
-            $form->addField($field, 'hidden', array('name' => $field, 'value' => $value));
-        }
-    }
-    $form->addField('submit', 'submit', array('name' => 'submit', 'class' => 'p24-button', 'value' => __('Pay with Przelewy24')));
-    echo '<div class="p24-payment-form" style="text-align: right">', $form->toHtml(), '</div>';
+    ?>
+
+    <div style="text-align: right">
+    <div class="buttons-set">
+        <p>
+            <a href="<?php echo Summary::getLink($order) ?>">
+                <?php echo __('Pay with Przelewy24') ?>
+            </a>
+        </p>
+    </div>
+
+    <?php
 }

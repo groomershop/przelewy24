@@ -36,7 +36,6 @@ class Summary extends \Magento\Framework\App\Action\Action
         $order_id = (string) $this->getRequest()->getParam('order_id');
         $_order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
         $store_id = $_order->getStoreId();
-        $fullConfig = Waluty::getFullConfig($_order->getOrderCurrencyCode(), $this->scopeConfig, $store_id);
 
         $right_key = md5($store_id . '|' . $_order->getEntityId());
 
@@ -44,8 +43,35 @@ class Summary extends \Magento\Framework\App\Action\Action
             $this->_redirect('customer/account');
         }
 
+        /* If the user is on this page, we assume the order is to be paid again. Clear p24_session_id. */
+        $_order->setData('p24_session_id', '');
+        $_order->save();
+
         $this->_view->loadLayout();
         $this->_view->getPage()->getConfig()->getTitle()->set( __('Przelewy24 - continue order payment'));
         $this->_view->renderLayout();
+    }
+
+    /**
+     * Get summary link.
+     *
+     * @param $storeId
+     * @param \Magento\Sales\Model\Order $order
+     * @return string
+     */
+    public static function getLink(\Magento\Sales\Model\Order $order): string
+    {
+        $storeId = $order->getStoreId();
+
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+        $base_url = $storeManager->getStore($storeId)->getBaseUrl();
+
+        /* StoreId jest pobierane bezposrednio z zamówienia dzięki czemu możemy skojazyć w jakim języku zamówienie zostało złożone */
+        $right_key = md5($storeId . '|' . $order->getEntityId());
+
+        $payment_link = $base_url . 'przelewy/przelewy/summary/order_id/' . $order->getIncrementId() . '/key/' . $right_key;
+
+        return $payment_link;
     }
 }

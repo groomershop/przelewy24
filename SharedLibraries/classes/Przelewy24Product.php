@@ -4,7 +4,7 @@ if (!class_exists('Przelewy24Product', false)) {
     {
         private $translations;
 
-        public function __construct(array $translations = array())
+        public function __construct(array $translations = [])
         {
             $this->setTranslations($translations);
         }
@@ -14,9 +14,9 @@ if (!class_exists('Przelewy24Product', false)) {
          *
          * Read more: /docs/przelewy24product.md
          */
-        public function prepareCartItems($amount, array $items = array(), $shipping = 0)
+        public function prepareCartItems($amount, array $items = [], $shipping = 0)
         {
-            $cartItems = array();
+            $cartItems = [];
 
             if (empty($items)) {
                 return $cartItems;
@@ -28,6 +28,7 @@ if (!class_exists('Przelewy24Product', false)) {
             $number = 0;
             $sumProductsPrice = 0;
             $joinName = '';
+
             foreach ($items as $item) {
                 $number++;
 
@@ -50,7 +51,7 @@ if (!class_exists('Przelewy24Product', false)) {
                 $cartItems['p24_price_' . $number] = $amount - ($shipping + $sumProductsPrice);
                 $cartItems['p24_number_' . $number] = 0;
             } else if ($amount < $shipping + $sumProductsPrice) {
-                $cartItems = array();
+                $cartItems = [];
                 $number = 1;
                 $joinName = $this->translations['cart_as_product'] . ' [' . trim($joinName, ', ') . ']';
 
@@ -64,15 +65,19 @@ if (!class_exists('Przelewy24Product', false)) {
             return $cartItems;
         }
 
-        public function setTranslations(array $translations = array())
+        public function setTranslations(array $translations = [])
         {
             $this->translations = $translations;
             // set default values
-            if (empty($this->translations['virtual_product_name'])) {
-                $this->translations['virtual_product_name'] = __('Difference');
-            }
-            if (empty($this->translations['cart_as_product'])) {
-                $this->translations['cart_as_product'] = __('Order');
+            $defaultTranslations = [
+                'virtual_product_name' => __('Difference'),
+                'cart_as_product' => __('Order')
+            ];
+
+            foreach ($defaultTranslations as $translationKey => $translationValue) {
+                if (empty($this->translations[$translationKey])) {
+                    $this->translations[$translationKey] = $translationValue;
+                }
             }
         }
     }

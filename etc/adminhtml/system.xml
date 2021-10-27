@@ -123,16 +123,43 @@
             <!-- to make visible set showIn.. on 1-->
             <group id="promoted" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Additional settings</label>
+
                 <field id="show_promoted" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Promote some payment methods</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Selected items will be shown next to other payments gateways</comment>
                 </field>
+
                 <field id="paymethod_promoted" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>paymethod_promoted</label>
                 </field>
             </group>
-            <group id="paysettings" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <group id="P24NOW" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Promote P24NOW</label>
+
+                <field id="promote_in_payment_methods" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Promote P24NOW payment</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>P24NOW module will be promoted as main payment option</comment>
+                </field>
+
+                <field id="promote_in_payment" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Promote P24NOW in payment methods</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Customer will see P24NOW as a promoted option</comment>
+                </field>
+
+<!--                <field id="promoted_tile_width" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">-->
+<!--                    <label>Tile width</label>-->
+<!--                    <source_model>Dialcom\Przelewy\Model\Config\TileWidth</source_model>-->
+<!--                    <depends>-->
+<!--                        <field id="*/*/promote_in_payment">1</field>-->
+<!--                    </depends>-->
+<!--                </field>-->
+            </group>
+
+            <group id="paysettings" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Payment Settings</label>
                 <field id="usegraphical" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Use graphics list of payment methods</label>
@@ -183,7 +210,8 @@
                     <comment>After leaving the bank website, wait for the P24 transaction result?</comment>
                 </field>
             </group>
-            <group id="additionall" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <group id="additionall" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Additional settings</label>
                 <field id="extracharge" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Enable extra charge</label>
@@ -229,7 +257,8 @@
                     <comment>By default, the Google Analytics tracking code is placed on the confirmation page</comment>
                 </field>
             </group>
-            <!--<group id="multicurr" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+
+            <!--<group id="multicurr" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Subaccounts currency</label>
                 <field id="multicurr_list" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Currency list</label>

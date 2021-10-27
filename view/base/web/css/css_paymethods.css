@@ -139,6 +139,18 @@ a.bank-box.selected:before {
     width: 20em;
 }
 
+.bank-box.promoted-2 {
+    width: 276px;
+}
+
+.bank-box.promoted-3 {
+    width: 417px;
+}
+
+.bank-box.promoted-2 .bank-logo, .bank-box.promoted-3 .bank-logo {
+    width: 100%;
+}
+
 .bank-box.recurring .bank-logo {
     background: transparent url(../images/cc_empty.png) center 2px no-repeat;
 }

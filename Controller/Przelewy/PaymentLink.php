@@ -47,7 +47,8 @@ class PaymentLink extends \Magento\Framework\App\Action\Action
         return;
         //TODO - not working - this is ga_before_payment feature
 
-        $order_id = (int)$this->getRequest()->getParam('order_id');
+        /* The loadByIncrementId expects a string. We must not cast to a number. */
+        $order_id = (string)$this->getRequest()->getParam('order_id');
 
         if ($order_id) {
             $order = $this->_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);

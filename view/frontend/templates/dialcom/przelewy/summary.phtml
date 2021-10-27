@@ -2,7 +2,8 @@
 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 $helper = $this->helper('Dialcom\Przelewy\Helper\Data');
 $tr = $this->helper('Magento\Checkout\Helper\Data');
-$order_id = (int)$this->getRequest()->getParam('order_id');
+$order_id = (string)$this->getRequest()->getParam('order_id');
+/* The loadByIncrementId expects a string. We must not cast to a number. */
 $_order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
 $_order_items = $_order->getItemsCollection()
     ->addAttributeToSelect('*')
