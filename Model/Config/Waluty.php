@@ -46,6 +46,9 @@ class Waluty
 		$configValue = $scopeConfig->getValue($configKey, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
 
 		$result = array();
+		if($configValue === null) {
+			$vals = '';
+		}
 		$vals = explode(',', $configValue);
 		if (is_array($vals)) foreach ($vals as $item) {
 			$items = explode(':', $item);
