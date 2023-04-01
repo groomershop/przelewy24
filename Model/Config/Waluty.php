@@ -47,7 +47,7 @@ class Waluty
 
 		$result = array();
 		if($configValue === null) {
-			$vals = '';
+			$configValue = '';
 		}
 		$vals = explode(',', $configValue);
 		if (is_array($vals)) foreach ($vals as $item) {
