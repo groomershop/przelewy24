@@ -7,6 +7,6 @@ $extracharge_amount = (int) $przelewy->getExtrachargeAmountByAmount($totalCart *
 
 <?php if ($extracharge_amount > 0) { ?>
     <p style="font-size:small;font-style: italic;"><?php echo $this->__('This payment will be increased by'); ?>
-        <b><?php echo number_format($extracharge_amount / 100, 2, ',', ' ') . ' ' . filter_var($objectManager->get('Magento\Directory\Model\Currency')->getCurrencySymbol(), FILTER_SANITIZE_STRING); ?></b>.
+        <b><?php echo number_format($extracharge_amount / 100, 2, ',', ' ') . ' ' . htmlspecialchars($objectManager->get('Magento\Directory\Model\Currency')->getCurrencySymbol()); ?></b>.
     </p>
 <?php } ?>

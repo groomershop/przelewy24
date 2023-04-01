@@ -28,7 +28,7 @@ class Product
 
         $result = array();
         foreach ($productCollection as $product) {
-            $result[] = array('value' => (int) $product->getId(), 'label' => filter_var($product->getName(), FILTER_SANITIZE_STRING));
+            $result[] = array('value' => (int) $product->getId(), 'label' => htmlspecialchars($product->getName()));
         }
         return $result;
     }

@@ -243,11 +243,11 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
             'p24_email' => filter_var($order->getCustomerEmail(), FILTER_SANITIZE_EMAIL),
             'p24_amount' => $amount,
             'p24_currency' => $currency,
-            'p24_description' => filter_var(__('Order').' '. $calculatedOrderId, FILTER_SANITIZE_STRING),
+            'p24_description' => htmlspecialchars(__('Order').' '. $calculatedOrderId),
             'p24_language' => strtolower(substr($this->objectManager->get('Magento\Framework\Locale\Resolver')->getLocale(), 0, 2)),
-            'p24_client' => filter_var($order->getBillingAddress()->getData('firstname') . ' ' . $order->getBillingAddress()->getData('lastname'), FILTER_SANITIZE_STRING),
-            'p24_address' => filter_var($order->getBillingAddress()->getData('street'), FILTER_SANITIZE_STRING),
-            'p24_city' => filter_var($order->getBillingAddress()->getData('city'), FILTER_SANITIZE_STRING),
+            'p24_client' => htmlspecialchars($order->getBillingAddress()->getData('firstname') . ' ' . $order->getBillingAddress()->getData('lastname')),
+            'p24_address' => htmlspecialchars($order->getBillingAddress()->getData('street')),
+            'p24_city' => htmlspecialchars($order->getBillingAddress()->getData('city')),
             'p24_zip' => $order->getBillingAddress()->getData('postcode'),
             'p24_country' => 'PL',
             'p24_encoding' => 'utf-8',
@@ -266,7 +266,7 @@ class Przelewy extends \Magento\Payment\Model\Method\AbstractMethod
             $product = $this->objectManager->create('Magento\Catalog\Model\Product')->load($productId);
 
             $productsInfo[] = [
-                'name' => filter_var($product->getName(), FILTER_SANITIZE_STRING),
+                'name' => htmlspecialchars($product->getName()),
                 'description' => $product->getDescription(),
                 'quantity' => (int)$item->getQtyOrdered(),
                 'price' => (int)number_format($item->getPrice() * 100, 0, "", ""),

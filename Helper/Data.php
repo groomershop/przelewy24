@@ -227,7 +227,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $payinshop = (int)$this->scopeConfig->getValue(Data::XML_PATH_PAYINSHOP, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
         $gaBeforePayment = (int)$this->scopeConfig->getValue(Data::XML_PATH_GA_BEFORE_PAYMENT, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
         $paymentData = $order->getPayment()->getData();
-        $additionalInformation = filter_var($paymentData['additional_information'], FILTER_SANITIZE_STRING);
+        $additionalInformation = htmlspecialchars($paymentData['additional_information']);
         $payInShopByCard = $payinshop && in_array($additionalInformation['method_id'], Recurring::getChannelsCards());
 
         $gaOrderId = ($gaBeforePayment === 1 && !$payInShopByCard) ? 0 : $this->_request->getParam('ga_order_id', 0);
