@@ -71,7 +71,11 @@ class PrzelewyConfigProvider implements \Magento\Checkout\Model\ConfigProviderIn
 
         $this->lastPaymentMethod = $this->method->getBlock()->getLastPaymentMethod();
         $this->cards = $this->method->getOneClick() ? $this->method->getBlock()->getCards() : [];
-        $this->payMethodPromoted = explode(',', $this->method->getPayMethodPromoted());
+        $promotedPayMethod = $this->method->getPayMethodPromoted();
+        if($promotedPayMethod === null) {
+            $promotedPayMethod = '';
+        }
+        $this->payMethodPromoted = explode(',', $promotedPayMethod);
     }
 
     /**
