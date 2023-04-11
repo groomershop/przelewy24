@@ -60,13 +60,21 @@ class PrzelewyConfigProvider implements \Magento\Checkout\Model\ConfigProviderIn
         $this->paymentList = $this->method->getBlock()->getPaymentChannels();
         $this->channelsInstallment = Channels::getChannelsInstallment();
         $this->channelsCards = Recurring::getChannelsCards();
+        $payMethodFirst = $this->method->getPayMethodFirst();
+        if($payMethodFirst === null) {
+            $payMethodFirst = '';
+        }
         $this->payMethodFirst = $this->removeMethod142and145(
             $this->paymentList,
-            explode(',', $this->method->getPayMethodFirst())
+            explode(',', $payMethodFirst)
         );
+        $payMethodSecond = $this->method->getPayMethodSecond();
+        if($payMethodSecond === null) {
+            $payMethodSecond = '';
+        }
         $this->payMethodSecond = $this->removeMethod142and145(
             $this->paymentList,
-            explode(',', $this->method->getPayMethodSecond())
+            explode(',', $payMethodSecond)
         );
 
         $this->lastPaymentMethod = $this->method->getBlock()->getLastPaymentMethod();
