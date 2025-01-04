@@ -7,9 +7,14 @@
                     <value id="style_przelewy24" type="host">secure.przelewy24.pl</value>
                 </values>
             </policy>
+            <policy id="img-src">
+                <values>
+                    <value id="img_przelewy24" type="host">secure.przelewy24.pl</value>
+                </values>
+            </policy>
             <policy id="script-src">
                 <values>
-                    <value id="style_przelewy24" type="host">secure.przelewy24.pl</value>
+                    <value id="script_przelewy24" type="host">secure.przelewy24.pl</value>
                 </values>
             </policy>
         </policies>
