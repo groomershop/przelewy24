@@ -78,7 +78,7 @@ class Redirect extends \Magento\Framework\App\Action\Action
         $payinshop = (int)$this->scopeConfig->getValue(Data::XML_PATH_PAYINSHOP, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
         $gaBeforePayment = (int)$this->scopeConfig->getValue(Data::XML_PATH_GA_BEFORE_PAYMENT, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
 
-        if ($payinshop && in_array($additionalInformation['method_id'], Recurring::getChannelsCards())) {
+        if ($payinshop && in_array('method_id', $additionalInformation) && in_array($additionalInformation['method_id'], Recurring::getChannelsCards())) {
             $this->_view->loadLayout();
             $this->_view->getPage()->getConfig()->getTitle()->set( __('Payment by card'));
             $this->registry->register('payInShopByCard', true);
